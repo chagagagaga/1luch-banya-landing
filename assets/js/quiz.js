@@ -83,6 +83,13 @@
 
   /* ---- Утилиты ----------------------------------------------------------- */
   function fmt(n) { return Math.round(n || 0).toLocaleString('ru-RU').replace(/,/g, ' '); }
+
+  // Вилка цены. Каждая сумма — неразрывный кусок вместе со знаком рубля,
+  // перенос возможен только по тире. Так знак ₽ никогда не отрывается от числа
+  // и не вылезает за край карточки, даже когда сумма семизначная.
+  function rangeHtml() {
+    return '<i>' + fmt(state.total) + '</i>&#8202;–&#8202;<i>' + fmt(state.totalMax) + '&nbsp;₽</i>';
+  }
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]; }); }
   function num(v, d) { return (v).toFixed(d).replace('.', ','); }
 
@@ -296,7 +303,7 @@
       '<div class="calc__result" data-result>' +
         '<div class="calc__result-row">' +
           '<span>Ориентир по вашей конфигурации</span>' +
-          '<b data-total>' + fmt(state.total) + ' – ' + fmt(state.totalMax) + ' ₽</b>' +
+          '<b data-total>' + rangeHtml() + '</b>' +
         '</div>' +
         (state.mode === 'both' && (state.gift || state.discount) ?
           '<div class="calc__result-gift">' +
@@ -399,7 +406,7 @@
   function updateResult() {
     calc();
     var el = root.querySelector('[data-total]');
-    if (el) el.textContent = fmt(state.total) + ' – ' + fmt(state.totalMax) + ' ₽';
+    if (el) el.innerHTML = rangeHtml();
   }
 
   // Пересобирает карточку подобранной печи без полной перерисовки
@@ -490,6 +497,7 @@
         '<div class="modal__channels" data-channels>' +
           '<button type="button" class="modal__chan" data-chan="whatsapp">WhatsApp</button>' +
           '<button type="button" class="modal__chan" data-chan="telegram">Telegram</button>' +
+          (P.company.maxUrl ? '<button type="button" class="modal__chan" data-chan="max">MAX</button>' : '') +
           '<button type="button" class="modal__chan" data-chan="call">Звонок</button>' +
         '</div>' +
 
@@ -573,7 +581,7 @@
     calc();
     var rows = summary().split('\n').filter(function (r) { return r.indexOf('Расчёт:') !== 0; });
     box.innerHTML =
-      '<div class="modal__summary-price"><span>Ваш расчёт</span><b>' + fmt(state.total) + ' – ' + fmt(state.totalMax) + ' ₽</b></div>' +
+      '<div class="modal__summary-price"><span>Ваш расчёт</span><b>' + rangeHtml() + '</b></div>' +
       '<ul>' + rows.map(function (r) { return '<li>' + esc(r) + '</li>'; }).join('') + '</ul>';
   }
 

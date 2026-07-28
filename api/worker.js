@@ -49,7 +49,7 @@ function escapeHtml(s) {
 
 const MODE_LABEL = { stove: 'Только печь', finish: 'Отделка под ключ', both: 'Печь + отделка' };
 const TIMING_LABEL = { now: 'Уже сейчас', '1-3m': 'В ближайшие 1–3 мес.', later: 'Позже, присматривается' };
-const CHANNEL_LABEL = { whatsapp: 'WhatsApp', telegram: 'Telegram', call: 'Звонок' };
+const CHANNEL_LABEL = { whatsapp: 'WhatsApp', telegram: 'Telegram', max: 'MAX', call: 'Звонок' };
 
 /* ---- Сборка сообщения ----------------------------------------------------- */
 

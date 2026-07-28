@@ -44,12 +44,13 @@
   --amber:      #e9ac52;   /* акцент цены: только цифры на тёмном */
   --wa:         #25d366;
   --tg:         #2aabee;
+  --max:        #3b5bff;
 
   /* Типографика: Onest в заголовки и цифры, Golos Text в текст */
   --font: 'Golos Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
   --font-display: 'Onest', var(--font);
 
-  --fs-h1:  clamp(2.125rem, 1.1rem + 4vw, 4rem);
+  --fs-h1:  clamp(2.125rem, 1.1rem + 3.4vw, 3.5rem);
   --fs-h2:  clamp(1.625rem, 1.05rem + 2.2vw, 2.5rem);
   --fs-h3:  clamp(1.25rem, .95rem + .7vw, 1.5rem);
   --fs-lead:clamp(1rem, .95rem + .35vw, 1.125rem);
@@ -100,6 +101,12 @@ body {
 }
 body.is-locked { overflow: hidden; }
 
+/* Заголовки балансируются по строкам, чтобы последнее слово не оставалось
+   одно. text-wrap работает в свежих браузерах; для остальных в разметке
+   стоят неразрывные пробелы перед последним словом. */
+h1, h2, h3, h4, .section__title, .hero__title { text-wrap: balance; }
+p, .section__lead { text-wrap: pretty; }
+
 h1, h2, h3, h4 { margin: 0; font-family: var(--font-display); line-height: 1.08; letter-spacing: -.025em; font-weight: 700; }
 p { margin: 0; }
 ul, ol { margin: 0; padding: 0; list-style: none; }
@@ -123,6 +130,8 @@ input, textarea, select, button { font-family: inherit; font-size: inherit; }
 .section__title { font-size: var(--fs-h2); }
 .section__lead { margin-top: 1rem; font-size: var(--fs-lead); color: var(--text-soft); }
 .section__lead b { color: var(--text); }
+
+.nb { white-space: nowrap; }
 
 .form-honey { position: absolute !important; left: -9999px !important; width: 1px; height: 1px; opacity: 0; }
 
@@ -152,6 +161,8 @@ input, textarea, select, button { font-family: inherit; font-size: inherit; }
 .btn--phone:hover { background: var(--ink); }
 .btn--wa { background: var(--wa); color: #fff; }
 .btn--tg { background: var(--tg); color: #fff; }
+.btn--max { background: var(--max); color: #fff; }
+.btn--max:hover { background: #2c49d8; }
 
 .btn--sm { padding: .7em 1.15em; font-size: var(--fs-xs); }
 .btn--lg { padding: 1.1em 1.9em; font-size: 1rem; }
@@ -249,7 +260,7 @@ textarea.input { resize: vertical; min-height: 88px; }
 }
 .hero__badge .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--amber); }
 
-.hero__title { font-size: var(--fs-h1); font-weight: 700; letter-spacing: -.035em; line-height: 1.03; }
+.hero__title { font-size: var(--fs-h1); font-weight: 700; letter-spacing: -.035em; line-height: 1.03; text-wrap: balance; }
 .hero__title em { font-style: normal; color: var(--amber); }
 .hero__sub { margin-top: 1.15rem; font-size: var(--fs-lead); color: var(--text-invert-soft); max-width: 46ch; }
 
@@ -577,7 +588,11 @@ textarea.input { resize: vertical; min-height: 88px; }
 /* ═══════════════════════════════════════════════════════════════════════════
    14. ОТЗЫВЫ
    ═════════════════════════════════════════════════════════════════════════ */
-.reviews__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: var(--gap); }
+/* Отзывов пять, колонок три — последний ряд неполный. Поэтому не грид,
+   а флекс с центрированием: остаток строки выравнивается по середине,
+   и блок не выглядит обрубленным справа. */
+.reviews__grid { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--gap); }
+.reviews__grid > * { flex: 0 1 calc((100% - var(--gap) * 2) / 3); min-width: 300px; }
 .review { margin: 0; display: flex; flex-direction: column; gap: 1.1rem; padding: clamp(1.3rem, 1rem + 1vw, 1.85rem); border-radius: var(--r-lg); background: #fff; border: 1px solid var(--line); }
 .review blockquote { margin: 0; font-size: var(--fs-sm); line-height: 1.65; color: var(--text); }
 .review blockquote::before { content: '«'; color: var(--stone); font-size: 1.6rem; line-height: 0; vertical-align: -.15em; margin-right: .1em; }
@@ -696,7 +711,7 @@ textarea.input { resize: vertical; min-height: 88px; }
 .modal__summary-price b { font-family: var(--font-display); font-size: 1.5rem; font-weight: 700; color: var(--amber); letter-spacing: -.025em; font-variant-numeric: tabular-nums; }
 .modal__summary ul { margin-top: .6rem; padding-top: .6rem; border-top: 1px solid var(--line-dark); display: grid; gap: .25rem; }
 .modal__summary li { font-size: var(--fs-xs); color: rgba(248, 243, 234, .72); }
-.modal__channels { display: grid; grid-template-columns: repeat(3, 1fr); gap: .4rem; margin-bottom: 1.1rem; }
+.modal__channels { display: grid; grid-template-columns: repeat(auto-fit, minmax(88px, 1fr)); gap: .4rem; margin-bottom: 1.1rem; }
 .modal__chan { padding: .65em .4em; border: 1px solid var(--line); border-radius: var(--r-sm); background: #fff; font-size: var(--fs-sm); font-weight: 600; transition: all var(--t); }
 .modal__chan.is-on { background: var(--ink); border-color: var(--ink); color: var(--text-invert); }
 .chips--timing .chip { font-size: var(--fs-xs); }
@@ -819,11 +834,14 @@ textarea.input { resize: vertical; min-height: 88px; }
 .calc__result { padding: 1rem 1.1rem; margin-bottom: .8rem; }
 .calc__social { margin-top: .5rem; }
 
-/* Вилка: не рвём сумму и знак рубля */
-.calc__result-row { flex-wrap: nowrap; align-items: flex-end; }
-.calc__result-row span { flex: none; max-width: 8.5em; line-height: 1.25; }
-.calc__result-row b { white-space: nowrap; font-size: clamp(1.25rem, .9rem + 1.5vw, 2rem); }
-.modal__summary-price b { white-space: nowrap; }
+/* Вилка: подпись сверху, сумма отдельной строкой во всю ширину карточки.
+   Знак рубля приклеен к числу, перенос возможен только по тире. */
+.calc__result-row { display: block; }
+.calc__result-row span { display: block; max-width: none; line-height: 1.25; margin-bottom: .25rem; }
+.calc__result-row b { display: block; font-size: clamp(1.5rem, 1rem + 2vw, 2.15rem); line-height: 1.1; }
+.calc__result-row b i,
+.modal__summary-price b i { font-style: normal; white-space: nowrap; }
+.modal__summary-price b { white-space: normal; }
 
 /* «Вилка, а не финальная цена» — не серая сноска, а заметная строка */
 .calc__result-note {
@@ -866,7 +884,9 @@ textarea.input { resize: vertical; min-height: 88px; }
   font-size: var(--fs-xs); font-weight: 600; letter-spacing: .12em; text-transform: uppercase;
   color: var(--text-soft); margin-bottom: .9rem;
 }
-.stovelive__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: .5rem; }
+/* То же и здесь: фотографий может быть любое число, ряд-остаток центрируем. */
+.stovelive__grid { display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem; }
+.stovelive__grid img { flex: 0 1 calc((100% - .5rem * 4) / 5); min-width: 180px; }
 .stovelive__grid img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: var(--r); }
 
 /* ── 25.6 Фото в этапах 4–6 ─────────────────────────────────────────────── */
@@ -935,13 +955,13 @@ textarea.input { resize: vertical; min-height: 88px; }
 
   .trustbar__nums { grid-template-columns: 1fr 1fr; }
   .trustbar__proof { align-items: flex-start; }
-  .stovelive__grid { grid-template-columns: 1fr 1fr; }
+  .stovelive__grid img { flex-basis: calc((100% - .5rem) / 2); min-width: 0; }
   .magnet__form .btn { width: 100%; }
 }
 
 @media (max-width: 420px) {
   .trustbar__nums { grid-template-columns: 1fr 1fr; }
-  .stovelive__grid { grid-template-columns: 1fr 1fr; }
+  .stovelive__grid img { flex-basis: calc((100% - .5rem) / 2); min-width: 0; }
   .calc__result-row span { max-width: 7em; }
 }
 

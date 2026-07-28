@@ -21,6 +21,10 @@
     var waText = encodeURIComponent('Здравствуйте! Пишу с сайта, хочу рассчитать парную / подобрать печь.');
     $$('[data-wa-link]').forEach(function (a) { a.href = 'https://wa.me/' + c.whatsapp + '?text=' + waText; });
     $$('[data-tg-link]').forEach(function (a) { a.href = 'https://t.me/' + c.telegram; });
+    // MAX показываем только когда в pricing.js указана реальная ссылка
+    $$('[data-max-link]').forEach(function (a) {
+      if (c.maxUrl) { a.href = c.maxUrl; a.hidden = false; } else { a.hidden = true; }
+    });
     $$('[data-phone-link]').forEach(function (a) {
       a.href = c.phoneHref;
       if (a.textContent.trim().indexOf('+7') === 0) a.textContent = c.phone;
