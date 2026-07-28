@@ -12,7 +12,8 @@
  * ==========================================================================*/
 
 const ALLOWED_ORIGINS = [
-  'https://banya.1-luch.ru',
+  'https://chagagagaga.github.io',   // GitHub Pages — текущий адрес лендинга
+  'https://banya.1-luch.ru',         // будущий свой домен
   'https://1-luch.ru',
   'https://www.1-luch.ru',
   'http://localhost:8080',

@@ -62,8 +62,12 @@ var ENDPOINT = window.LUCH_ENDPOINT || 'https://luch-lead.workers.dev/lead';
 var ENDPOINT = window.LUCH_ENDPOINT || 'https://luch-lead.ВАШ-АККАУНТ.workers.dev/lead';
 ```
 
-И в `api/worker.js` в списке `ALLOWED_ORIGINS` укажите домен, где будет жить
-лендинг (например `https://banya.1-luch.ru`), после чего повторите `wrangler deploy`.
+В списке `ALLOWED_ORIGINS` в `api/worker.js` адрес GitHub Pages
+(`https://chagagagaga.github.io`) уже прописан. Когда подключите свой домен —
+добавьте его туда же и повторите `wrangler deploy`.
+
+> Сам лендинг остаётся на GitHub Pages. Cloudflare здесь — только приёмник форм,
+> хостинг не переезжает.
 
 ---
 
