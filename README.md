@@ -138,6 +138,24 @@ yandexMetrikaId: 0,        // ← номер счётчика Метрики
 
 ---
 
+## Деплой
+
+Лендинг развёрнут на GitHub Pages:
+**https://chagagagaga.github.io/1luch-banya-landing/**
+
+Любой push в ветку `main` пересобирает страницу автоматически за 1–2 минуты:
+
+```bash
+git add -A && git commit -m "правки" && git push
+```
+
+Свой домен (например `banya.1-luch.ru`) подключается так:
+1. У регистратора домена добавьте CNAME-запись `banya` → `chagagagaga.github.io`
+2. В настройках репозитория → Pages → Custom domain впишите `banya.1-luch.ru`
+3. Дождитесь выпуска сертификата и включите Enforce HTTPS
+
+---
+
 ## Локальный запуск
 
 ```bash
