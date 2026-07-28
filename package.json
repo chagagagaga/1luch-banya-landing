@@ -1,0 +1,13 @@
+{
+  "name": "1luch-banya-landing",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Лендинг «Первый Луч»: отделка парной под ключ и банные печи. Холодный трафик Яндекс.Директа.",
+  "scripts": {
+    "test": "node docs/smoke-test.mjs",
+    "start": "python3 -m http.server 8080"
+  },
+  "devDependencies": {
+    "jsdom": "^25.0.0"
+  }
+}
