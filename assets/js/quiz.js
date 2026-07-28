@@ -88,7 +88,7 @@
   // перенос возможен только по тире. Так знак ₽ никогда не отрывается от числа
   // и не вылезает за край карточки, даже когда сумма семизначная.
   function rangeHtml() {
-    return '<i>' + fmt(state.total) + '</i>&#8202;–&#8202;<i>' + fmt(state.totalMax) + '&nbsp;₽</i>';
+    return '<i>' + fmt(state.total) + '</i>&#8201;–&#8201;<i>' + fmt(state.totalMax) + '&nbsp;₽</i>';
   }
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]; }); }
   function num(v, d) { return (v).toFixed(d).replace('.', ','); }
@@ -497,7 +497,7 @@
         '<div class="modal__channels" data-channels>' +
           '<button type="button" class="modal__chan" data-chan="whatsapp">WhatsApp</button>' +
           '<button type="button" class="modal__chan" data-chan="telegram">Telegram</button>' +
-          (P.company.maxUrl ? '<button type="button" class="modal__chan" data-chan="max">MAX</button>' : '') +
+          '<button type="button" class="modal__chan" data-chan="max">MAX</button>' +
           '<button type="button" class="modal__chan" data-chan="call">Звонок</button>' +
         '</div>' +
 

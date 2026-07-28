@@ -133,6 +133,11 @@ input, textarea, select, button { font-family: inherit; font-size: inherit; }
 
 .nb { white-space: nowrap; }
 
+/* Атрибут hidden должен побеждать любые display из компонентов.
+   Без этого .btn { display: inline-flex } перебивает его, и скрытая
+   кнопка продолжает отображаться — например мессенджер без ссылки. */
+[hidden] { display: none !important; }
+
 .form-honey { position: absolute !important; left: -9999px !important; width: 1px; height: 1px; opacity: 0; }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -208,6 +213,7 @@ textarea.input { resize: vertical; min-height: 88px; }
 }
 .header.is-stuck { background: var(--ink); border-bottom-color: var(--line-dark); }
 .header__inner { display: flex; align-items: center; gap: 1.25rem; min-height: 72px; }
+.header__inner > * { min-width: 0; }
 
 .logo { display: inline-flex; align-items: center; gap: .65rem; flex: none; }
 .logo__mark { display: grid; place-items: center; width: 38px; height: 38px; color: var(--fire); }
@@ -328,6 +334,7 @@ textarea.input { resize: vertical; min-height: 88px; }
 /* Ползунок */
 .calc-range { padding-top: .2rem; }
 .calc-range input[type=range] {
+  margin: 0; /* у Chrome свой margin 2px — из-за него блок вылезал за карточку */
   -webkit-appearance: none; appearance: none; width: 100%; height: 6px; border-radius: 2px;
   background: linear-gradient(90deg, var(--fire) var(--fill, 50%), var(--paper-3) var(--fill, 50%));
   outline: none;
@@ -452,7 +459,8 @@ textarea.input { resize: vertical; min-height: 88px; }
    9. ПАКЕТЫ
    ═════════════════════════════════════════════════════════════════════════ */
 .packages { background: var(--paper-2); }
-.packages__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: var(--gap); align-items: start; }
+.packages__grid { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--gap); align-items: stretch; }
+.packages__grid > * { flex: 0 1 calc((100% - var(--gap) * 2) / 3); min-width: 290px; }
 .pkg {
   position: relative; display: flex; flex-direction: column; height: 100%;
   padding: clamp(1.3rem, 1rem + 1vw, 1.85rem); border-radius: var(--r-lg);
@@ -489,7 +497,10 @@ textarea.input { resize: vertical; min-height: 88px; }
 .filter-group__label { font-size: var(--fs-xs); font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text-soft); }
 .chips { justify-content: center; }
 
-.stoves__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--gap); }
+/* Карточек 16, колонок три — последний ряд неполный. Флекс с центрированием,
+   чтобы одинокая карточка не висела у левого края. */
+.stoves__grid { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--gap); }
+.stoves__grid > * { flex: 0 1 calc((100% - var(--gap) * 2) / 3); min-width: 280px; }
 .stove { display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: var(--r-lg); background: #fff; overflow: hidden; transition: transform var(--t), box-shadow var(--t); }
 .stove:hover { transform: translateY(-4px); box-shadow: var(--sh); }
 .stove__media { position: relative; aspect-ratio: 1 / 1; display: grid; place-items: center; padding: 1.25rem; background: var(--paper-3); }
@@ -539,7 +550,9 @@ textarea.input { resize: vertical; min-height: 88px; }
 /* ═══════════════════════════════════════════════════════════════════════════
    12. ПОРТФОЛИО
    ═════════════════════════════════════════════════════════════════════════ */
-.works__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: var(--gap); }
+.works__grid { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--gap); }
+.works__grid > * { flex: 0 1 calc((100% - var(--gap) * 2) / 3); min-width: 300px; }
+.works__grid > .work.is-hidden { display: none; }
 .work.is-hidden { display: none; }
 .work__btn { position: relative; display: block; width: 100%; padding: 0; border: 0; background: none; border-radius: var(--r); overflow: hidden; }
 .work__btn img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; transition: transform .5s cubic-bezier(.2, .7, .3, 1); }
@@ -572,7 +585,8 @@ textarea.input { resize: vertical; min-height: 88px; }
    ═════════════════════════════════════════════════════════════════════════ */
 .videos { background: var(--ink); color: var(--text-invert); }
 .videos .section__title { color: var(--text-invert); }
-.videos__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--gap); }
+.videos__grid { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--gap); }
+.videos__grid > * { flex: 0 1 calc((100% - var(--gap) * 2) / 3); min-width: 280px; }
 .video__btn, .video__frame { position: relative; display: block; width: 100%; aspect-ratio: 16 / 9; padding: 0; border: 0; background: #000; border-radius: var(--r); overflow: hidden; }
 .video__btn img { width: 100%; height: 100%; object-fit: cover; transition: transform .5s ease, opacity var(--t); }
 .video__btn:hover img { transform: scale(1.04); opacity: .85; }
@@ -606,7 +620,8 @@ textarea.input { resize: vertical; min-height: 88px; }
    15. ЭТАПЫ
    ═════════════════════════════════════════════════════════════════════════ */
 .steps { background: var(--paper-2); }
-.steps__list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--gap); }
+.steps__list { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--gap); }
+.steps__list > * { flex: 0 1 calc((100% - var(--gap) * 2) / 3); min-width: 280px; }
 .step { position: relative; display: flex; flex-direction: column; gap: .7rem; padding: 1.4rem; border-radius: var(--r-lg); background: #fff; border: 1px solid var(--line); }
 .step__n { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; background: var(--ink); color: var(--amber); font-weight: 750; font-size: .95rem; }
 .step__body h3 { font-size: 1.05rem; }
@@ -629,7 +644,8 @@ textarea.input { resize: vertical; min-height: 88px; }
    17. ГАРАНТИИ
    ═════════════════════════════════════════════════════════════════════════ */
 .guarantees { background: var(--paper-2); }
-.guarantees__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--gap); }
+.guarantees__grid { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--gap); }
+.guarantees__grid > * { flex: 0 1 calc((100% - var(--gap) * 3) / 4); min-width: 272px; }
 .gcard { padding: clamp(1.3rem, 1rem + 1vw, 1.75rem); border-radius: var(--r-lg); background: #fff; border: 1px solid var(--line); }
 .gcard__icon { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 2px; background: var(--paper-3); color: var(--ink); font-family: var(--font-display); font-weight: 700; font-size: 1.1rem; margin-bottom: 1rem; }
 .gcard h3 { font-size: 1.05rem; }
@@ -775,7 +791,15 @@ textarea.input { resize: vertical; min-height: 88px; }
 @media (max-width: 720px) {
   .mobilebar { display: flex; }
   body { padding-bottom: 76px; }
-  .header__inner { min-height: 62px; }
+  /* На узком экране логотип ужимается, дескриптор прячется — иначе шапка
+     не помещается и появляется горизонтальный скролл на всю страницу. */
+  .header__inner { min-height: 62px; gap: .6rem; }
+  .logo { flex: 0 1 auto; min-width: 0; }
+  .logo__text i { display: none; }
+  .logo__text b { font-size: .95rem; white-space: nowrap; }
+  .logo__mark { width: 32px; height: 32px; }
+  .header__right { gap: .5rem; }
+  .header__right .btn { padding: .65em .85em; }
   .nav { inset: 62px 0 auto; }
 
   .hero__proof { flex-direction: column; align-items: flex-start; }
@@ -963,7 +987,6 @@ textarea.input { resize: vertical; min-height: 88px; }
 @media (max-width: 420px) {
   .trustbar__nums { grid-template-columns: 1fr 1fr; }
   .stovelive__grid img { flex-basis: calc((100% - .5rem) / 2); min-width: 0; }
-  .calc__result-row span { max-width: 7em; }
 }
 
 

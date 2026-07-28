@@ -19,12 +19,28 @@
   (function contacts() {
     var c = P.company;
     var waText = encodeURIComponent('Здравствуйте! Пишу с сайта, хочу рассчитать парную / подобрать печь.');
-    $$('[data-wa-link]').forEach(function (a) { a.href = 'https://wa.me/' + c.whatsapp + '?text=' + waText; });
-    $$('[data-tg-link]').forEach(function (a) { a.href = 'https://t.me/' + c.telegram; });
-    // MAX показываем только когда в pricing.js указана реальная ссылка
-    $$('[data-max-link]').forEach(function (a) {
-      if (c.maxUrl) { a.href = c.maxUrl; a.hidden = false; } else { a.hidden = true; }
-    });
+
+    // Кнопку-ссылку показываем, только когда контакт реально задан в pricing.js.
+    // Кнопка, ведущая в никуда, стоит дороже отсутствующей: человек кликает,
+    // попадает на ошибку и уходит уже с испорченным впечатлением.
+    function wire(sel, url) {
+      $$(sel).forEach(function (a) {
+        if (url) { a.href = url; a.hidden = false; a.removeAttribute('aria-hidden'); }
+        else { a.hidden = true; a.setAttribute('aria-hidden', 'true'); a.removeAttribute('href'); }
+      });
+    }
+    wire('[data-wa-link]',  c.whatsapp ? 'https://wa.me/' + c.whatsapp + '?text=' + waText : '');
+    wire('[data-tg-link]',  c.telegram ? 'https://t.me/' + c.telegram : '');
+    wire('[data-max-link]', c.maxUrl || '');
+
+    // Пока ни один мессенджер не подключён — блок вопросов не должен обещать
+    // того, чего на странице нет. Подставляем телефон и переписываем подводку.
+    if (!c.whatsapp && !c.telegram && !c.maxUrl) {
+      $$('[data-msg-fallback]').forEach(function (a) { a.hidden = false; });
+      var lead = $('[data-faq-lead]');
+      if (lead) lead.innerHTML = 'Если вопроса нет в списке — позвоните, ответим сразу. '
+        + '<span class="nb">' + esc(c.worktime) + '.</span>';
+    }
     $$('[data-phone-link]').forEach(function (a) {
       a.href = c.phoneHref;
       if (a.textContent.trim().indexOf('+7') === 0) a.textContent = c.phone;
