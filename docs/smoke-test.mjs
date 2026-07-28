@@ -58,7 +58,6 @@ const render = {
   'калькулятор отрисован':   q('[data-calc] .calc'),
   'вкладки сценария (3)':    q('[data-mode]'),
   'ползунки':                q('input[type=range]'),
-  'карточка подобранной печи':q('[data-pick]'),
   'итог расчёта':            q('[data-total]'),
   'пакеты отделки (3)':      q('[data-pkg-card]'),
   'карточки печей':          q('.stove'),
@@ -83,6 +82,7 @@ const finishOnly = !!d.querySelector('[data-area]') && !d.querySelector('[data-v
 click('[data-mode="stove"]');
 const stoveOnly = !!d.querySelector('[data-volume]') && !d.querySelector('[data-area]');
 click('[data-mode="both"]');
+const pickShown = q('[data-pick]') > 0;
 
 const vol = d.querySelector('[data-volume]');
 const pickBefore = d.querySelector('.calc-pick__name')?.textContent;
@@ -114,11 +114,15 @@ form.querySelector('[name=name]').value = '';
 form.dispatchEvent(new window.Event('submit', { bubbles: true, cancelable: true }));
 const validates = /обращаться/.test(form.querySelector('.form-status')?.textContent || '');
 
+// в ru-RU разряды разделяются неразрывным пробелом — нормализуем перед сверкой
+const startedOnFinish = /390 000/.test((total0 || '').replace(/\s/g, ' '));
+
 const attr = window.LuchAttribution ? window.LuchAttribution.getPayload() : {};
 const utmOk = attr?.last_touch?.marks?.utm_source === 'yandex' && attr?.last_touch?.marks?.yclid === 'test123';
 
 const checks = {
   'вкладка «отделка» прячет объём':   finishOnly,
+  'в комплекте есть карточка печи':   pickShown,
   'вкладка «печь» прячет площадь':    stoveOnly,
   'объём меняет модель печи':         pickBefore !== pickAfter,
   'объём пересчитывает итог':         total0 !== totalAfter,
@@ -129,6 +133,7 @@ const checks = {
   'маска телефона работает':          masked,
   'валидация ловит пустое имя':       validates,
   'UTM и yclid захватываются':        utmOk,
+  'стартует с минимальной вилки':     startedOnFinish,
 };
 
 console.log('\n— Интерактив —');

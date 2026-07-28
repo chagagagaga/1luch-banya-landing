@@ -17,15 +17,44 @@
   var P = window.LUCH;
   var R = P.ranges;
 
+  /* ---- Стартовая конфигурация из адреса страницы -------------------------
+     Директ приземляет разные кампании на разные вкладки калькулятора:
+       ?product=stove   — «Только печь»      (кампании по запросам «печь для бани»)
+       ?product=finish  — «Отделка под ключ» (кампании «отделка парной», «баня под ключ»)
+       ?product=both    — «Печь + отделка»   (общие и ретаргет)
+     Дополнительно можно задать пакет: ?pkg=comfort|premium|author
+     Метки чувствительны только к первому слову, регистр не важен.
+
+     Почему по умолчанию «отделка» и пакет «Комфорт», а не комплект и «Премиум»:
+     человек с холодного трафика в первые три секунды видит стартовую сумму.
+     Комплект в «Премиуме» даёт больше миллиона — это отпугивает тех, кто
+     пришёл по запросу про печь. Пусть первое впечатление будет полом цены,
+     а не потолком: вкладку «Печь + отделка» с плашкой «выгодно» он увидит рядом.
+  ------------------------------------------------------------------------- */
+  var QS = new URLSearchParams(location.search || '');
+
+  function paramOneOf(name, allowed, fallback) {
+    var raw = (QS.get(name) || '').toLowerCase().trim();
+    if (!raw) return fallback;
+    var alias = {
+      pech: 'stove', pechi: 'stove', 'печь': 'stove', 'печи': 'stove',
+      otdelka: 'finish', 'отделка': 'finish', banya: 'finish', 'баня': 'finish',
+      all: 'both', komplekt: 'both', 'комплект': 'both',
+      author: 'author', avtorskiy: 'author',
+    };
+    var v = alias[raw] || raw;
+    return allowed.indexOf(v) !== -1 ? v : fallback;
+  }
+
   /* ---- Состояние --------------------------------------------------------- */
   var state = {
-    mode: 'both',                 // 'stove' | 'finish' | 'both'
+    mode: paramOneOf('product', ['stove', 'finish', 'both'], 'finish'),
     volume: R.volume.default,     // м³ — для печи
     area: R.area.default,         // м² — для отделки
     fuel: 'wood',
     tier: 'mid',
     steamType: 'russian',
-    pkg: 'premium',
+    pkg: paramOneOf('pkg', ['comfort', 'premium', 'author'], 'comfort'),
     stoveOpts: new Set(P.stoveOptions.filter(function (o) { return o.default; }).map(function (o) { return o.id; })),
     finishOpts: new Set(),
     channel: 'whatsapp',
@@ -109,9 +138,15 @@
     }
 
     if (state.mode === 'both') {
+      // В комплекте монтаж печи и дымоход входят в работы по отделке, поэтому
+      // считаем их в смету и тут же дарим: сумма не меняется, но человек видит,
+      // от чего именно он освобождён. Иначе строка «в подарок» обещала бы то,
+      // чего в расчёте нет — а это первое, на чём ловят на замере.
       P.bundle.giftIds.forEach(function (id) {
         var o = P.stoveOptions.find(function (x) { return x.id === id; });
-        if (o && state.stoveOpts.has(id)) gift += o.price;
+        if (!o) return;
+        if (!state.stoveOpts.has(id)) stovePart += o.price;
+        gift += o.price;
       });
       discount = finishPart * (P.bundle.discountPct / 100);
     }
@@ -423,6 +458,7 @@
       stove_price: state.stove ? state.stove.price : 0,
       finish_options: [].concat(Array.from(state.finishOpts)),
       stove_options: [].concat(Array.from(state.stoveOpts)),
+      entry_product: QS.get('product') || '',
       estimate_min: state.total,
       estimate_max: state.totalMax,
       bundle_saving: state.mode === 'both' ? (state.gift + state.discount) : 0,
