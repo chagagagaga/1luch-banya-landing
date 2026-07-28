@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Заявка принята — Первый Луч</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="assets/img/ui/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/css/styles.css?v=1">
+<style>
+  .thanks { min-height: 100dvh; display: grid; place-items: center; padding: 2rem 1rem; background: var(--ink); color: var(--text-invert); }
+  .thanks__card { width: min(620px, 100%); text-align: center; padding: clamp(1.75rem, 1rem + 3vw, 3.25rem); border-radius: var(--r-xl); background: var(--paper); color: var(--text); box-shadow: var(--sh-lg); }
+  .thanks__icon { width: 76px; height: 76px; margin: 0 auto 1.5rem; border-radius: 50%; display: grid; place-items: center; background: #e6f6ec; color: #1f8a4c; }
+  .thanks__icon svg { width: 40px; height: 40px; }
+  .thanks h1 { font-size: clamp(1.5rem, 1.1rem + 1.8vw, 2.25rem); }
+  .thanks__lead { margin-top: .9rem; color: var(--text-soft); font-size: var(--fs-lead); }
+  .thanks__next { display: grid; gap: .75rem; margin: 2rem 0; text-align: left; }
+  .thanks__next li { display: flex; gap: .8rem; align-items: flex-start; padding: .9rem 1rem; border-radius: var(--r); background: var(--paper-2); font-size: var(--fs-sm); }
+  .thanks__next b { flex: none; display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--fire); color: #fff; font-size: .78rem; }
+  .thanks__actions { display: flex; flex-wrap: wrap; gap: .6rem; justify-content: center; }
+  .thanks__phone { display: block; margin-top: 1.5rem; font-size: var(--fs-sm); color: var(--text-soft); }
+  .thanks__phone a { font-weight: 700; color: var(--text); }
+</style>
+</head>
+<body>
+
+<main class="thanks">
+  <div class="thanks__card">
+    <div class="thanks__icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="m9 16.17-4.17-4.17-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+    </div>
+
+    <h1>Заявка принята</h1>
+    <p class="thanks__lead">
+      Инженер уже получил вашу конфигурацию. Свяжемся в течение 30 минут
+      в рабочее время — ежедневно с 9:00 до 21:00.
+    </p>
+
+    <ol class="thanks__next">
+      <li><b>1</b><span>Уточним размеры парной, состояние помещения и сроки — 5 минут разговора.</span></li>
+      <li><b>2</b><span>Пришлём три варианта сметы и 3D-эскиз парной. Бесплатно и без обязательств.</span></li>
+      <li><b>3</b><span>Если всё устроит — назначим бесплатный выезд инженера на замер по Москве и МО.</span></li>
+    </ol>
+
+    <div class="thanks__actions">
+      <a class="btn btn--wa" data-wa-link target="_blank" rel="noopener">Написать в WhatsApp</a>
+      <a class="btn btn--ghost" href="index.html">Вернуться на сайт</a>
+    </div>
+
+    <p class="thanks__phone">Не дождались звонка? Наберите сами: <a href="tel:+74951411888" data-phone-link>+7 (495) 141-18-88</a></p>
+  </div>
+</main>
+
+<script src="assets/js/pricing.js?v=1"></script>
+<script>
+  /* Ссылки на мессенджеры и цель «страница благодарности» */
+  (function () {
+    var c = window.LUCH && LUCH.company;
+    if (!c) return;
+    var text = encodeURIComponent('Здравствуйте! Только что оставил(а) заявку на сайте.');
+    document.querySelectorAll('[data-wa-link]').forEach(function (a) { a.href = 'https://wa.me/' + c.whatsapp + '?text=' + text; });
+    document.querySelectorAll('[data-phone-link]').forEach(function (a) { a.href = c.phoneHref; a.textContent = c.phone; });
+  })();
+</script>
+<script src="assets/js/ym-goals.js?v=1"></script>
+<script>
+  if (window.LuchGoal) window.LuchGoal('thanks_page_view');
+</script>
+</body>
+</html>

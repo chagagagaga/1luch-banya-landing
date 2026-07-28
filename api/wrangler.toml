@@ -1,0 +1,16 @@
+name = "luch-lead"
+main = "worker.js"
+compatibility_date = "2026-07-01"
+
+# Секреты НЕ пишем сюда — только через `wrangler secret put`.
+# Список секретов:
+#   TELEGRAM_BOT_TOKEN  — токен бота от @BotFather
+#   TELEGRAM_CHAT_ID    — id чата или группы (через запятую можно несколько)
+#   RESEND_API_KEY      — ключ Resend для дубля на почту (опционально)
+#   MAIL_TO             — куда слать дубль (через запятую)
+#   MAIL_FROM           — от кого, например: Заявки <lead@1-luch.ru>
+#   CRM_WEBHOOK         — URL вебхука CRM (опционально)
+
+[vars]
+# Публичные переменные, если понадобятся
+ENVIRONMENT = "production"
