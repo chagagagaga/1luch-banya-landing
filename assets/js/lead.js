@@ -15,8 +15,18 @@
   var ENDPOINT = window.LUCH_ENDPOINT || 'https://luch-lead.workers.dev/lead';
   var THANKS_URL = 'spasibo.html';
 
+  // Демо-режим: показываем весь сценарий, но ничего не отправляем.
+  // Включается сам при открытии с диска/локально и вручную через ?demo=1 —
+  // удобно показывать заказчику и дизайнеру, пока приёмник не задеплоен.
   var isLocal = location.protocol === 'file:' ||
-                /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+                /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ||
+                /(^|[?&])demo=1(&|$)/.test(location.search);
+
+  if (!isLocal && /luch-lead\.workers\.dev/.test(ENDPOINT)) {
+    console.warn('[Первый Луч] Приёмник заявок не настроен: в assets/js/lead.js ' +
+      'стоит адрес-заглушка. Заявки уходить не будут. Инструкция — api/README.md. ' +
+      'Чтобы посмотреть сценарий целиком, откройте страницу с ?demo=1');
+  }
 
   /* ---- Маска телефона ---------------------------------------------------- */
   function maskPhone(el) {
