@@ -653,7 +653,8 @@ textarea.input { resize: vertical; min-height: 88px; }
    ═════════════════════════════════════════════════════════════════════════ */
 .faq__inner { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: clamp(1.5rem, 1rem + 3vw, 4rem); align-items: start; }
 .faq .section__head { margin-bottom: 0; }
-.faq .section__head .btn { margin-top: 1.5rem; }
+.faq .section__head .btn { margin-top: 0; }
+.faq__contact { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: 1.5rem; }
 .faq__list { display: grid; gap: .6rem; }
 .qa { border: 1px solid var(--line); border-radius: var(--r); background: #fff; overflow: hidden; }
 .qa summary { display: flex; align-items: center; gap: 1rem; padding: 1.1rem 1.3rem; cursor: pointer; list-style: none; font-weight: 620; font-size: .98rem; }
