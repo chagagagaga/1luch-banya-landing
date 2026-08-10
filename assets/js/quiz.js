@@ -1,12 +1,15 @@
 /* ============================================================================
    ПЕРВЫЙ ЛУЧ — конфигуратор-квиз в первом экране
    ----------------------------------------------------------------------------
-   Одна карточка, три сценария (печь / отделка / комплект), живая вилка цены,
-   автоподбор модели печи под объём парной и модалка захвата контакта.
+   Два сценария: «Только печь» и «Парная под ключ». Отделки без печи не бывает —
+   печь задаёт объём, вентиляцию, расположение полков и противопожарные отступы,
+   поэтому она входит в оба сценария.
 
-   ВАЖНО для дизайна: разметка ниже задаёт классы и data-атрибуты, на которые
-   опирается логика. Меняйте оформление (CSS) и порядок блоков свободно,
-   но сохраняйте data-* атрибуты — см. docs/DESIGN_BRIEF.md.
+   Считаем в квадратных метрах пола при стандартной высоте 2,4 м: заказчик знает
+   площадь и почти никогда не знает кубатуру. Объём для подбора печи получаем
+   пересчётом, с поправками на стекло и холодные стены.
+
+   ВАЖНО для дизайна: логика цепляется за data-* атрибуты — см. docs/DESIGN_BRIEF.md.
    ========================================================================== */
 (function () {
   'use strict';
@@ -16,20 +19,13 @@
 
   var P = window.LUCH;
   var R = P.ranges;
+  var RULES = P.calcRules;
 
   /* ---- Стартовая конфигурация из адреса страницы -------------------------
-     Директ приземляет разные кампании на разные вкладки калькулятора:
-       ?product=stove   — «Только печь»      (кампании по запросам «печь для бани»)
-       ?product=finish  — «Отделка под ключ» (кампании «отделка парной», «баня под ключ»)
-       ?product=both    — «Печь + отделка»   (общие и ретаргет)
-     Дополнительно можно задать пакет: ?pkg=comfort|premium|author
-     Метки чувствительны только к первому слову, регистр не важен.
-
-     Почему по умолчанию «отделка» и пакет «Комфорт», а не комплект и «Премиум»:
-     человек с холодного трафика в первые три секунды видит стартовую сумму.
-     Комплект в «Премиуме» даёт больше миллиона — это отпугивает тех, кто
-     пришёл по запросу про печь. Пусть первое впечатление будет полом цены,
-     а не потолком: вкладку «Печь + отделка» с плашкой «выгодно» он увидит рядом.
+     Кампании Директа приземляются на нужный сценарий:
+       ?product=stove — «Только печь»
+       ?product=full  — «Парная под ключ»
+     Дополнительно: ?pkg=comfort|premium|author
   ------------------------------------------------------------------------- */
   var QS = new URLSearchParams(location.search || '');
 
@@ -37,10 +33,9 @@
     var raw = (QS.get(name) || '').toLowerCase().trim();
     if (!raw) return fallback;
     var alias = {
-      pech: 'stove', pechi: 'stove', 'печь': 'stove', 'печи': 'stove',
-      otdelka: 'finish', 'отделка': 'finish', banya: 'finish', 'баня': 'finish',
-      all: 'both', komplekt: 'both', 'комплект': 'both',
-      author: 'author', avtorskiy: 'author',
+      pech: 'stove', 'печь': 'stove', pechi: 'stove',
+      otdelka: 'full', 'отделка': 'full', banya: 'full', 'баня': 'full', both: 'full',
+      avtorskiy: 'author', 'авторский': 'author',
     };
     var v = alias[raw] || raw;
     return allowed.indexOf(v) !== -1 ? v : fallback;
@@ -48,9 +43,10 @@
 
   /* ---- Состояние --------------------------------------------------------- */
   var state = {
-    mode: paramOneOf('product', ['stove', 'finish', 'both'], 'finish'),
-    volume: R.volume.default,     // м³ — для печи
-    area: R.area.default,         // м² — для отделки
+    mode: paramOneOf('product', ['stove', 'full'], 'full'),
+    area: R.area.default,          // м² пола парной
+    glass: 0,                      // м² стекла — каждый метр добавляет 1 м³
+    coldWall: false,               // улица или неутеплённая стена: +50%
     fuel: 'wood',
     tier: 'mid',
     steamType: 'russian',
@@ -61,18 +57,12 @@
     stove: null,
     total: 0,
     totalMax: 0,
+    byProject: false,
   };
 
   var MODES = [
-    { id: 'stove',  label: 'Только печь',        hint: 'Подбор и монтаж' },
-    { id: 'finish', label: 'Отделка под ключ',   hint: 'Парная целиком' },
-    { id: 'both',   label: 'Печь + отделка',     hint: 'Выгоднее', best: true },
-  ];
-
-  var STEAM_TYPES = [
-    { id: 'russian', label: 'Русская баня', hint: '60 °C · влажность 60%' },
-    { id: 'finnish', label: 'Финская сауна', hint: '90–110 °C · сухой пар' },
-    { id: 'hammam',  label: 'Хамам',         hint: '45 °C · влажность 100%' },
+    { id: 'stove', label: 'Только печь', hint: 'Подбор и монтаж' },
+    { id: 'full',  label: 'Парная под ключ', hint: 'Отделка вместе с печью', best: true },
   ];
 
   var TIERS = [
@@ -83,144 +73,153 @@
 
   /* ---- Утилиты ----------------------------------------------------------- */
   function fmt(n) { return Math.round(n || 0).toLocaleString('ru-RU').replace(/,/g, ' '); }
-
-  // Вилка цены. Каждая сумма — неразрывный кусок вместе со знаком рубля,
-  // перенос возможен только по тире. Так знак ₽ никогда не отрывается от числа
-  // и не вылезает за край карточки, даже когда сумма семизначная.
-  function rangeHtml() {
-    return '<i>' + fmt(state.total) + '</i>&#8201;–&#8201;<i>' + fmt(state.totalMax) + '&nbsp;₽</i>';
-  }
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]; }); }
   function num(v, d) { return (v).toFixed(d).replace('.', ','); }
 
-  // Псевдослучайное, но стабильное в течение дня число «заказали расчёт сегодня»
+  // Диапазон цены. Каждая сумма — неразрывный кусок вместе со знаком рубля,
+  // перенос возможен только по тире.
+  function rangeHtml() {
+    if (state.byProject) return '<i>Цена по проекту</i>';
+    return '<i>' + fmt(state.total) + '</i>&#8201;–&#8201;<i>' + fmt(state.totalMax) + '&nbsp;₽</i>';
+  }
+
   function todayOrders() {
     var d = new Date();
-    var seed = d.getFullYear() * 372 + d.getMonth() * 31 + d.getDate();
-    var hourFactor = Math.max(1, Math.round(d.getHours() / 2));
-    return 4 + (seed % 7) + hourFactor;
+    return 4 + ((d.getFullYear() * 372 + d.getMonth() * 31 + d.getDate()) % 7) + Math.max(1, Math.round(d.getHours() / 2));
+  }
+
+  /* ---- Расчётный объём парной -------------------------------------------
+     Площадь × высота 2,4 м, плюс кубометр на каждый квадрат стекла,
+     плюс 50% если стена выходит на улицу или не утеплена.
+     Кирпичная стена в расчёт не идёт.
+  ------------------------------------------------------------------------- */
+  function volume() {
+    var v = state.area * RULES.ceilingHeight + state.glass * RULES.glassPerM2;
+    if (state.coldWall) v *= (1 + RULES.coldWallSurcharge);
+    return Math.round(v);
   }
 
   /* ---- Подбор печи под объём -------------------------------------------- */
   function pickStove() {
+    var vol = volume();
     var list = P.stoves.filter(function (s) {
-      return s.fuel === state.fuel && state.volume >= s.vmin - 2 && state.volume <= s.vmax + 2;
+      return s.fuel === state.fuel && vol >= s.vmin - 2 && vol <= s.vmax + 2;
     });
-    if (!list.length) {
-      list = P.stoves.filter(function (s) { return s.fuel === state.fuel; });
-    }
+    if (!list.length) list = P.stoves.filter(function (s) { return s.fuel === state.fuel; });
     var order = { base: 0, mid: 1, premium: 2 };
     var want = order[state.tier];
     list.sort(function (a, b) {
       var da = Math.abs(order[a.tier] - want), db = Math.abs(order[b.tier] - want);
       if (da !== db) return da - db;
-      // при равном классе — тот, чей диапазон точнее накрывает объём
-      var ca = Math.abs((a.vmin + a.vmax) / 2 - state.volume);
-      var cb = Math.abs((b.vmin + b.vmax) / 2 - state.volume);
-      return ca - cb;
+      return Math.abs((a.vmin + a.vmax) / 2 - vol) - Math.abs((b.vmin + b.vmax) / 2 - vol);
     });
     return list[0] || null;
   }
 
+  function currentPkg() {
+    return P.packages.filter(function (p) { return p.id === state.pkg; })[0] || P.packages[0];
+  }
+
   /* ---- Расчёт ------------------------------------------------------------ */
   function calc() {
-    var stovePart = 0, finishPart = 0, gift = 0, discount = 0;
     state.stove = pickStove();
+    state.byProject = false;
 
-    if (state.mode === 'stove' || state.mode === 'both') {
-      stovePart += state.stove ? state.stove.price : 0;
-      P.stoveOptions.forEach(function (o) {
-        if (state.stoveOpts.has(o.id)) stovePart += o.price;
-      });
+    // Хамам делается только в авторском исполнении
+    if (state.steamType === 'hammam') state.pkg = 'author';
+
+    var stovePart = state.stove ? state.stove.price : 0;
+    P.stoveOptions.forEach(function (o) { if (state.stoveOpts.has(o.id)) stovePart += o.price; });
+
+    if (state.mode === 'stove') {
+      state.total = Math.round(stovePart / 1000) * 1000;
+      state.totalMax = Math.round(stovePart * 1.18 / 1000) * 1000;
+      return;
     }
 
-    if (state.mode === 'finish' || state.mode === 'both') {
-      var pkg = P.packages.find(function (p) { return p.id === state.pkg; }) || P.packages[1];
-      finishPart += state.area * pkg.pricePerM2;
-      // хамам дороже дерева: мокрая зона, плитка, парогенератор
-      if (state.steamType === 'hammam') finishPart *= 1.25;
-      P.finishOptions.forEach(function (o) {
-        if (state.finishOpts.has(o.id)) finishPart += o.price;
-      });
-    }
+    var pkg = currentPkg();
+    // Авторский проект и хамам не тарифицируются за метр — считаем индивидуально
+    if (!pkg.pricePerM2) { state.byProject = true; state.total = 0; state.totalMax = 0; return; }
 
-    if (state.mode === 'both') {
-      // В комплекте монтаж печи и дымоход входят в работы по отделке, поэтому
-      // считаем их в смету и тут же дарим: сумма не меняется, но человек видит,
-      // от чего именно он освобождён. Иначе строка «в подарок» обещала бы то,
-      // чего в расчёте нет — а это первое, на чём ловят на замере.
-      P.bundle.giftIds.forEach(function (id) {
-        var o = P.stoveOptions.find(function (x) { return x.id === id; });
-        if (!o) return;
-        if (!state.stoveOpts.has(id)) stovePart += o.price;
-        gift += o.price;
-      });
-      discount = finishPart * (P.bundle.discountPct / 100);
-    }
+    var rate = state.steamType === 'finnish' ? 'finnish' : 'russian';
+    var finishPart = state.area * pkg.pricePerM2[rate];
+    P.finishOptions.forEach(function (o) { if (state.finishOpts.has(o.id)) finishPart += o.price; });
 
-    var total = Math.max(0, stovePart + finishPart - gift - discount);
+    // Печь входит в отделку во всех пакетах
+    var total = finishPart + stovePart;
     state.total = Math.round(total / 1000) * 1000;
-    state.totalMax = Math.round((total * 1.22) / 1000) * 1000;
-    state.gift = gift;
-    state.discount = Math.round(discount);
-    return state.total;
+    state.totalMax = Math.round(total * 1.22 / 1000) * 1000;
   }
 
   /* ---- Разметка ---------------------------------------------------------- */
   function optionRow(o, checked) {
-    return '' +
-      '<button type="button" class="calc-opt' + (checked ? ' is-on' : '') + '" data-opt="' + o.id + '">' +
-        '<span class="calc-opt__box" aria-hidden="true"></span>' +
-        '<span class="calc-opt__body">' +
-          '<span class="calc-opt__name">' + esc(o.name) + '</span>' +
-          (o.hint ? '<span class="calc-opt__hint">' + esc(o.hint) + '</span>' : '') +
-        '</span>' +
-        '<span class="calc-opt__price">+' + fmt(o.price) + ' ₽</span>' +
-      '</button>';
+    return '<button type="button" class="calc-opt' + (checked ? ' is-on' : '') + '" data-opt="' + o.id + '">' +
+      '<span class="calc-opt__box" aria-hidden="true"></span>' +
+      '<span class="calc-opt__body"><span class="calc-opt__name">' + esc(o.name) + '</span>' +
+      (o.hint ? '<span class="calc-opt__hint">' + esc(o.hint) + '</span>' : '') + '</span>' +
+      '<span class="calc-opt__price">+' + fmt(o.price) + ' ₽</span></button>';
   }
 
   function render() {
     calc();
-
-    var showStove  = state.mode === 'stove' || state.mode === 'both';
-    var showFinish = state.mode === 'finish' || state.mode === 'both';
-    var pkg = P.packages.find(function (p) { return p.id === state.pkg; }) || P.packages[1];
+    var full = state.mode === 'full';
+    var pkg = currentPkg();
 
     root.innerHTML = '' +
     '<div class="calc">' +
 
       '<div class="calc__head">' +
         '<h2 class="calc__title">Рассчитайте вашу баню</h2>' +
-        '<p class="calc__sub">Минута — и вы знаете вилку цены. Без звонков и регистраций.</p>' +
+        '<p class="calc__sub">Минута — и вы знаете диапазон цены. Без звонков и регистраций.</p>' +
       '</div>' +
 
-      // ── Шаг 1: сценарий ──────────────────────────────────────────────
       '<div class="calc__field calc__field--modes">' +
         '<span class="calc__label"><i>1</i> Что нужно сделать?</span>' +
         '<div class="calc-modes" data-modes>' +
           MODES.map(function (m) {
             return '<button type="button" class="calc-mode' + (state.mode === m.id ? ' is-on' : '') + '" data-mode="' + m.id + '">' +
-              (m.best ? '<span class="calc-mode__best">выгодно</span>' : '') +
+              (m.best ? '<span class="calc-mode__best">чаще всего</span>' : '') +
               '<b>' + esc(m.label) + '</b><i>' + esc(m.hint) + '</i></button>';
           }).join('') +
         '</div>' +
+        '<p class="calc__hint">Отделки без печи не бывает: печь задаёт объём, вентиляцию и расположение полков. Поэтому она входит в оба варианта.</p>' +
       '</div>' +
 
-      // ── Ветка «отделка» ──────────────────────────────────────────────
-      (showFinish ? (
-        '<div class="calc__field">' +
-          '<span class="calc__label"><i>' + (showStove ? '2' : '2') + '</i> Площадь парной' +
-            '<b class="calc__value" data-area-val>' + num(state.area, 1) + ' м²</b></span>' +
-          '<div class="calc-range">' +
-            '<input type="range" min="' + R.area.min + '" max="' + R.area.max + '" step="' + R.area.step + '" value="' + state.area + '" data-area aria-label="Площадь парной в м²">' +
-            '<div class="calc-range__scale"><span>' + R.area.min + ' м²</span><span>' + R.area.max + ' м²</span></div>' +
-          '</div>' +
+      '<div class="calc__field">' +
+        '<span class="calc__label"><i>2</i> Площадь парной' +
+          '<b class="calc__value" data-area-val>' + num(state.area, 1) + ' м²</b></span>' +
+        '<div class="calc-range">' +
+          '<input type="range" min="' + R.area.min + '" max="' + R.area.max + '" step="' + R.area.step + '" value="' + state.area + '" data-area aria-label="Площадь парной в м²">' +
+          '<div class="calc-range__scale"><span>' + R.area.min + ' м²</span><span>' + R.area.max + ' м²</span></div>' +
         '</div>' +
+        '<p class="calc__hint">Площадь пола при высоте потолка 2,4 м. Расчётный объём для печи — <b data-vol>' + volume() + ' м³</b>.</p>' +
+      '</div>' +
 
+      '<details class="calc__more"' + (state.glass || state.coldWall ? ' open' : '') + '>' +
+        '<summary>Уточнить объём <span>' + (state.glass || state.coldWall ? '(учтено)' : '') + '</span></summary>' +
+        '<div class="calc__field" style="margin-top:.8rem">' +
+          '<span class="calc__label">Площадь стекла' +
+            '<b class="calc__value" data-glass-val>' + num(state.glass, 1) + ' м²</b></span>' +
+          '<div class="calc-range">' +
+            '<input type="range" min="0" max="6" step="0.5" value="' + state.glass + '" data-glass aria-label="Площадь стекла в м²">' +
+            '<div class="calc-range__scale"><span>нет</span><span>6 м²</span></div>' +
+          '</div>' +
+          '<p class="calc__hint">Каждый квадратный метр стекла считаем как дополнительный кубометр парной.</p>' +
+        '</div>' +
+        '<div class="calc-opts">' +
+          '<button type="button" class="calc-opt' + (state.coldWall ? ' is-on' : '') + '" data-cold>' +
+            '<span class="calc-opt__box" aria-hidden="true"></span>' +
+            '<span class="calc-opt__body"><span class="calc-opt__name">Стена на улицу или без утепления</span>' +
+            '<span class="calc-opt__hint">Добавляем 50% к расчётному объёму. Кирпичная стена в расчёт не идёт</span></span>' +
+          '</button>' +
+        '</div>' +
+      '</details>' +
+
+      (full ? (
         '<div class="calc__field">' +
-          '<span class="calc__label">Тип парной</span>' +
+          '<span class="calc__label"><i>3</i> Тип парной</span>' +
           '<div class="calc-radio" data-steam>' +
-            STEAM_TYPES.map(function (t) {
+            P.steamTypes.map(function (t) {
               return '<button type="button" class="calc-radio__opt' + (state.steamType === t.id ? ' is-on' : '') + '" data-steam-id="' + t.id + '">' +
                 '<b>' + esc(t.label) + '</b><i>' + esc(t.hint) + '</i></button>';
             }).join('') +
@@ -228,15 +227,20 @@
         '</div>' +
 
         '<div class="calc__field">' +
-          '<span class="calc__label">Уровень отделки</span>' +
+          '<span class="calc__label"><i>4</i> Уровень отделки</span>' +
           '<div class="calc-radio calc-radio--pkg" data-pkg>' +
             P.packages.map(function (p) {
-              return '<button type="button" class="calc-radio__opt' + (state.pkg === p.id ? ' is-on' : '') + '" data-pkg-id="' + p.id + '">' +
+              var locked = state.steamType === 'hammam' && p.id !== 'author';
+              return '<button type="button" class="calc-radio__opt' + (state.pkg === p.id ? ' is-on' : '') + '"' +
+                (locked ? ' disabled style="opacity:.4"' : '') + ' data-pkg-id="' + p.id + '">' +
                 (p.popular ? '<span class="calc-mode__best">хит</span>' : '') +
                 '<b>' + esc(p.name) + '</b><i>' + esc(p.wood) + '</i></button>';
             }).join('') +
           '</div>' +
-          '<p class="calc__hint">' + esc(pkg.tagline) + ' · от ' + fmt(pkg.pricePerM2) + ' ₽/м²</p>' +
+          '<p class="calc__hint">' + esc(pkg.tagline) +
+            (pkg.pricePerM2
+              ? ' · от ' + fmt(pkg.pricePerM2[state.steamType === 'finnish' ? 'finnish' : 'russian']) + ' ₽/м²'
+              : ' · ' + esc(pkg.priceNote)) + '</p>' +
         '</div>' +
 
         '<details class="calc__more"' + (state.finishOpts.size ? ' open' : '') + '>' +
@@ -247,169 +251,89 @@
         '</details>'
       ) : '') +
 
-      // ── Ветка «печь» ─────────────────────────────────────────────────
-      (showStove ? (
-        '<div class="calc__field">' +
-          '<span class="calc__label"><i>' + (showFinish ? '3' : '2') + '</i> Объём парной' +
-            '<b class="calc__value" data-volume-val>' + state.volume + ' м³</b></span>' +
-          '<div class="calc-range">' +
-            '<input type="range" min="' + R.volume.min + '" max="' + R.volume.max + '" step="' + R.volume.step + '" value="' + state.volume + '" data-volume aria-label="Объём парной в м³">' +
-            '<div class="calc-range__scale"><span>' + R.volume.min + ' м³</span><span>' + R.volume.max + ' м³</span></div>' +
-          '</div>' +
-          '<p class="calc__hint">Длина × ширина × высота. Есть окно или стеклянная дверь — прибавьте 25%.</p>' +
-        '</div>' +
-
-        '<div class="calc__field calc__field--row">' +
-          '<div>' +
-            '<span class="calc__label">Топливо</span>' +
-            '<div class="calc-radio calc-radio--slim" data-fuel>' +
-              '<button type="button" class="calc-radio__opt' + (state.fuel === 'wood' ? ' is-on' : '') + '" data-fuel-id="wood"><b>Дрова</b></button>' +
-              '<button type="button" class="calc-radio__opt' + (state.fuel === 'electric' ? ' is-on' : '') + '" data-fuel-id="electric"><b>Электро</b></button>' +
-            '</div>' +
-          '</div>' +
-          '<div>' +
-            '<span class="calc__label">Класс печи</span>' +
-            '<div class="calc-radio calc-radio--slim" data-tier>' +
-              TIERS.map(function (t) {
-                return '<button type="button" class="calc-radio__opt' + (state.tier === t.id ? ' is-on' : '') + '" data-tier-id="' + t.id + '"><b>' + esc(t.label) + '</b></button>';
-              }).join('') +
-            '</div>' +
+      '<div class="calc__field calc__field--row">' +
+        '<div>' +
+          '<span class="calc__label">Топливо</span>' +
+          '<div class="calc-radio calc-radio--slim" data-fuel>' +
+            '<button type="button" class="calc-radio__opt' + (state.fuel === 'wood' ? ' is-on' : '') + '" data-fuel-id="wood"><b>Дрова</b></button>' +
+            '<button type="button" class="calc-radio__opt' + (state.fuel === 'electric' ? ' is-on' : '') + '" data-fuel-id="electric"><b>Электро</b></button>' +
           '</div>' +
         '</div>' +
-
-        (state.stove ? (
-          '<div class="calc-pick" data-pick>' +
-            '<div class="calc-pick__img">' +
-              (state.stove.img ? '<img src="' + esc(state.stove.img) + '" alt="' + esc(state.stove.name) + '" loading="lazy">' : '') +
-            '</div>' +
-            '<div class="calc-pick__body">' +
-              '<span class="calc-pick__label">Подходит вашей парной</span>' +
-              '<b class="calc-pick__name">' + esc(state.stove.name) + '</b>' +
-              '<span class="calc-pick__meta">' + esc(state.stove.brand) + ' · ' + state.stove.vmin + '–' + state.stove.vmax + ' м³</span>' +
-            '</div>' +
-            '<div class="calc-pick__price">' + fmt(state.stove.price) + ' ₽</div>' +
-          '</div>'
-        ) : '') +
-
-        '<details class="calc__more"' + (state.stoveOpts.size ? ' open' : '') + '>' +
-          '<summary>Обвязка и монтаж <span>(' + state.stoveOpts.size + ')</span></summary>' +
-          '<div class="calc-opts" data-stove-opts>' +
-            P.stoveOptions.map(function (o) { return optionRow(o, state.stoveOpts.has(o.id)); }).join('') +
+        '<div>' +
+          '<span class="calc__label">Класс печи</span>' +
+          '<div class="calc-radio calc-radio--slim" data-tier>' +
+            TIERS.map(function (t) {
+              return '<button type="button" class="calc-radio__opt' + (state.tier === t.id ? ' is-on' : '') + '" data-tier-id="' + t.id + '"><b>' + esc(t.label) + '</b></button>';
+            }).join('') +
           '</div>' +
-        '</details>'
-      ) : '') +
-
-      // ── Итог ─────────────────────────────────────────────────────────
-      '<div class="calc__result" data-result>' +
-        '<div class="calc__result-row">' +
-          '<span>Ориентир по вашей конфигурации</span>' +
-          '<b data-total>' + rangeHtml() + '</b>' +
         '</div>' +
-        (state.mode === 'both' && (state.gift || state.discount) ?
-          '<div class="calc__result-gift">' +
-            '<span class="calc__gift-icon" aria-hidden="true">★</span>' +
-            'Выгода комплекта: ' + fmt(state.gift + state.discount) + ' ₽ — ' +
-            esc(P.bundle.label.toLowerCase()) + ' ' + esc(P.bundle.discountLabel) +
-          '</div>' : '') +
-        '<p class="calc__result-note">Вилка, а не финальная цена: точную смету инженер посчитает после бесплатного замера.</p>' +
       '</div>' +
 
-      // ── CTA ──────────────────────────────────────────────────────────
-      '<div class="calc__cta">' +
-        '<span class="calc__label calc__label--cta">Куда прислать расчёт и 3D-эскиз?</span>' +
-        '<div class="calc-actions">' +
-          '<button type="button" class="btn btn--messenger" data-cta="whatsapp">' +
-            '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.52 3.48A11.93 11.93 0 0 0 12.04 0C5.45 0 .09 5.36.09 11.95c0 2.11.55 4.17 1.6 5.99L0 24l6.22-1.63a11.94 11.94 0 0 0 5.82 1.49c6.59 0 11.95-5.36 11.95-11.95 0-3.19-1.24-6.19-3.48-8.43ZM12.04 21.79a9.9 9.9 0 0 1-5.04-1.38l-.36-.21-3.69.97.99-3.6-.24-.37a9.91 9.91 0 0 1-1.52-5.25c0-5.48 4.46-9.94 9.94-9.94 2.65 0 5.15 1.04 7.03 2.91a9.87 9.87 0 0 1 2.91 7.03c0 5.49-4.46 9.94-9.94 9.94Z"/></svg>' +
-            'В мессенджер</button>' +
-          '<button type="button" class="btn btn--phone" data-cta="call">' +
-            '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.49 15.36 17 14.6c-.5-.1-1 .04-1.36.4l-2.34 2.32c-3.5-1.78-6.4-4.62-8.18-8.18l2.34-2.36c.36-.36.5-.86.4-1.36L7.1 1.93C6.94 1.19 6.24.66 5.48.66H2.84c-.94 0-1.72.78-1.72 1.72C1.12 14.43 9.7 23 22.06 23c.94 0 1.72-.78 1.72-1.72v-2.66c0-.74-.5-1.42-1.29-1.62Z"/></svg>' +
-            'По телефону</button>' +
+      (state.stove ? (
+        '<div class="calc-pick" data-pick>' +
+          '<div class="calc-pick__img">' + (state.stove.img ? '<img src="' + esc(state.stove.img) + '" alt="' + esc(state.stove.name) + '" loading="lazy">' : '') + '</div>' +
+          '<div class="calc-pick__body">' +
+            '<span class="calc-pick__label">Подходит вашей парной</span>' +
+            '<b class="calc-pick__name">' + esc(state.stove.name) + '</b>' +
+            '<span class="calc-pick__meta">' + esc(state.stove.brand) + ' · ' + state.stove.vmin + '–' + state.stove.vmax + ' м³</span>' +
+          '</div>' +
+          '<div class="calc-pick__price">' + fmt(state.stove.price) + ' ₽</div>' +
+        '</div>'
+      ) : '') +
+
+      '<details class="calc__more"' + (state.stoveOpts.size ? ' open' : '') + '>' +
+        '<summary>Обвязка и монтаж <span>(' + state.stoveOpts.size + ')</span></summary>' +
+        '<div class="calc-opts" data-stove-opts>' +
+          P.stoveOptions.map(function (o) { return optionRow(o, state.stoveOpts.has(o.id)); }).join('') +
         '</div>' +
-        '<div class="calc__social"><span class="calc__pulse" aria-hidden="true"></span>' +
-          'Сегодня заказали расчёт: <b>' + todayOrders() + '</b></div>' +
+      '</details>' +
+
+      '<div class="calc__result" data-result>' +
+        '<div class="calc__result-row">' +
+          '<span>' + (state.byProject ? 'Ваш проект' : 'Ориентир по вашей конфигурации') + '</span>' +
+          '<b data-total>' + rangeHtml() + '</b>' +
+        '</div>' +
+        '<div class="calc__result-gift">' +
+          '<span class="calc__gift-icon" aria-hidden="true">★</span>' + esc(P.promo.title) +
+        '</div>' +
+        '<p class="calc__result-note">' +
+          (state.byProject
+            ? 'Авторский проект и хамам считаются индивидуально: состав работ и материалы каждый раз свои. Инженер посчитает после замера.'
+            : 'Диапазон, а не финальная цена: на итог влияют объём парной, выбранная печь и инженерные решения. Точную смету инженер посчитает после замера.') +
+        '</p>' +
+      '</div>' +
+
+      '<div class="calc__cta">' +
+        '<span class="calc__label calc__label--cta">Куда прислать расчёт?</span>' +
+        '<div class="calc-actions">' +
+          '<button type="button" class="btn btn--messenger" data-cta="whatsapp">В мессенджер</button>' +
+          '<button type="button" class="btn btn--phone" data-cta="call">По телефону</button>' +
+        '</div>' +
+        '<div class="calc__social"><span class="calc__pulse" aria-hidden="true"></span>Сегодня заказали расчёт: <b>' + todayOrders() + '</b></div>' +
       '</div>' +
 
     '</div>';
 
     bind();
     syncSlider('[data-area]');
-    syncSlider('[data-volume]');
+    syncSlider('[data-glass]');
   }
 
-  /* ---- Ползунок: заливка до бегунка ------------------------------------- */
   function syncSlider(sel) {
     var el = root.querySelector(sel);
     if (!el) return;
-    var min = +el.min, max = +el.max, v = +el.value;
-    el.style.setProperty('--fill', (((v - min) / (max - min)) * 100).toFixed(1) + '%');
+    var min = +el.min, max = +el.max;
+    el.style.setProperty('--fill', (((+el.value - min) / (max - min)) * 100).toFixed(1) + '%');
   }
-
-  /* ---- Обработчики ------------------------------------------------------- */
-  function bind() {
-    root.querySelectorAll('[data-mode]').forEach(function (b) {
-      b.addEventListener('click', function () { state.mode = b.dataset.mode; render(); });
-    });
-
-    var area = root.querySelector('[data-area]');
-    if (area) area.addEventListener('input', function () {
-      state.area = parseFloat(area.value);
-      root.querySelector('[data-area-val]').textContent = num(state.area, 1) + ' м²';
-      syncSlider('[data-area]');
-      updateResult();
-    });
-
-    var vol = root.querySelector('[data-volume]');
-    if (vol) vol.addEventListener('input', function () {
-      state.volume = parseInt(vol.value, 10);
-      root.querySelector('[data-volume-val]').textContent = state.volume + ' м³';
-      syncSlider('[data-volume]');
-      updatePick();
-    });
-
-    root.querySelectorAll('[data-steam-id]').forEach(function (b) {
-      b.addEventListener('click', function () { state.steamType = b.dataset.steamId; render(); });
-    });
-    root.querySelectorAll('[data-pkg-id]').forEach(function (b) {
-      b.addEventListener('click', function () { state.pkg = b.dataset.pkgId; render(); });
-    });
-    root.querySelectorAll('[data-fuel-id]').forEach(function (b) {
-      b.addEventListener('click', function () { state.fuel = b.dataset.fuelId; render(); });
-    });
-    root.querySelectorAll('[data-tier-id]').forEach(function (b) {
-      b.addEventListener('click', function () { state.tier = b.dataset.tierId; render(); });
-    });
-
-    var fo = root.querySelector('[data-finish-opts]');
-    if (fo) fo.addEventListener('click', function (e) {
-      var b = e.target.closest('[data-opt]'); if (!b) return;
-      toggle(state.finishOpts, b.dataset.opt); b.classList.toggle('is-on');
-      updateResult();
-    });
-
-    var so = root.querySelector('[data-stove-opts]');
-    if (so) so.addEventListener('click', function (e) {
-      var b = e.target.closest('[data-opt]'); if (!b) return;
-      toggle(state.stoveOpts, b.dataset.opt); b.classList.toggle('is-on');
-      updateResult();
-    });
-
-    root.querySelectorAll('[data-cta]').forEach(function (b) {
-      b.addEventListener('click', function () {
-        state.channel = b.dataset.cta;
-        openModal();
-      });
-    });
-  }
-
-  function toggle(set, id) { if (set.has(id)) set.delete(id); else set.add(id); }
 
   function updateResult() {
     calc();
     var el = root.querySelector('[data-total]');
     if (el) el.innerHTML = rangeHtml();
+    var v = root.querySelector('[data-vol]');
+    if (v) v.textContent = volume() + ' м³';
   }
 
-  // Пересобирает карточку подобранной печи без полной перерисовки
   function updatePick() {
     calc();
     var pick = root.querySelector('[data-pick]');
@@ -423,59 +347,119 @@
     updateResult();
   }
 
+  function toggle(set, id) { if (set.has(id)) set.delete(id); else set.add(id); }
+
+  function bind() {
+    root.querySelectorAll('[data-mode]').forEach(function (b) {
+      b.addEventListener('click', function () { state.mode = b.dataset.mode; render(); });
+    });
+
+    var area = root.querySelector('[data-area]');
+    if (area) area.addEventListener('input', function () {
+      state.area = parseFloat(area.value);
+      root.querySelector('[data-area-val]').textContent = num(state.area, 1) + ' м²';
+      syncSlider('[data-area]'); updatePick();
+    });
+
+    var glass = root.querySelector('[data-glass]');
+    if (glass) glass.addEventListener('input', function () {
+      state.glass = parseFloat(glass.value);
+      root.querySelector('[data-glass-val]').textContent = num(state.glass, 1) + ' м²';
+      syncSlider('[data-glass]'); updatePick();
+    });
+
+    var cold = root.querySelector('[data-cold]');
+    if (cold) cold.addEventListener('click', function () {
+      state.coldWall = !state.coldWall;
+      cold.classList.toggle('is-on', state.coldWall);
+      updatePick();
+    });
+
+    root.querySelectorAll('[data-steam-id]').forEach(function (b) {
+      b.addEventListener('click', function () { state.steamType = b.dataset.steamId; render(); });
+    });
+    root.querySelectorAll('[data-pkg-id]').forEach(function (b) {
+      b.addEventListener('click', function () { if (!b.disabled) { state.pkg = b.dataset.pkgId; render(); } });
+    });
+    root.querySelectorAll('[data-fuel-id]').forEach(function (b) {
+      b.addEventListener('click', function () { state.fuel = b.dataset.fuelId; render(); });
+    });
+    root.querySelectorAll('[data-tier-id]').forEach(function (b) {
+      b.addEventListener('click', function () { state.tier = b.dataset.tierId; render(); });
+    });
+
+    var fo = root.querySelector('[data-finish-opts]');
+    if (fo) fo.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-opt]'); if (!b) return;
+      toggle(state.finishOpts, b.dataset.opt); b.classList.toggle('is-on'); updateResult();
+    });
+
+    var so = root.querySelector('[data-stove-opts]');
+    if (so) so.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-opt]'); if (!b) return;
+      toggle(state.stoveOpts, b.dataset.opt); b.classList.toggle('is-on'); updateResult();
+    });
+
+    root.querySelectorAll('[data-cta]').forEach(function (b) {
+      b.addEventListener('click', function () { state.channel = b.dataset.cta; openModal(); });
+    });
+  }
+
   /* ---- Сводка конфигурации для менеджера --------------------------------- */
   function summary() {
     var lines = [];
-    var modeLabel = (MODES.find(function (m) { return m.id === state.mode; }) || {}).label;
-    lines.push('Сценарий: ' + modeLabel);
+    lines.push('Сценарий: ' + (MODES.filter(function (m) { return m.id === state.mode; })[0] || {}).label);
+    lines.push('Парная: ' + num(state.area, 1) + ' м² (высота 2,4 м) — расчётный объём ' + volume() + ' м³');
+    if (state.glass) lines.push('Стекло: ' + num(state.glass, 1) + ' м²');
+    if (state.coldWall) lines.push('Холодная или неутеплённая стена: +50% к объёму');
 
-    if (state.mode !== 'stove') {
-      var pkg = P.packages.find(function (p) { return p.id === state.pkg; });
-      var st = STEAM_TYPES.find(function (t) { return t.id === state.steamType; });
-      lines.push('Парная: ' + num(state.area, 1) + ' м², ' + (st ? st.label : ''));
-      lines.push('Пакет отделки: ' + (pkg ? pkg.name + ' (' + fmt(pkg.pricePerM2) + ' ₽/м²)' : ''));
+    if (state.mode === 'full') {
+      var st = P.steamTypes.filter(function (t) { return t.id === state.steamType; })[0];
+      var pkg = currentPkg();
+      lines.push('Тип парной: ' + (st ? st.label : ''));
+      lines.push('Пакет: ' + pkg.name + (pkg.pricePerM2
+        ? ' (' + fmt(pkg.pricePerM2[state.steamType === 'finnish' ? 'finnish' : 'russian']) + ' ₽/м²)'
+        : ' — цена по проекту'));
       if (state.finishOpts.size) {
         lines.push('Допы: ' + P.finishOptions.filter(function (o) { return state.finishOpts.has(o.id); })
           .map(function (o) { return o.name; }).join(', '));
       }
     }
-    if (state.mode !== 'finish') {
-      lines.push('Объём парной: ' + state.volume + ' м³, ' + (state.fuel === 'wood' ? 'дровяная' : 'электрическая'));
-      if (state.stove) lines.push('Подобрана печь: ' + state.stove.name + ' — ' + fmt(state.stove.price) + ' ₽');
-      if (state.stoveOpts.size) {
-        lines.push('Обвязка: ' + P.stoveOptions.filter(function (o) { return state.stoveOpts.has(o.id); })
-          .map(function (o) { return o.name; }).join(', '));
-      }
+    lines.push('Топливо: ' + (state.fuel === 'wood' ? 'дрова' : 'электро'));
+    if (state.stove) lines.push('Подобрана печь: ' + state.stove.name + ' — ' + fmt(state.stove.price) + ' ₽');
+    if (state.stoveOpts.size) {
+      lines.push('Обвязка: ' + P.stoveOptions.filter(function (o) { return state.stoveOpts.has(o.id); })
+        .map(function (o) { return o.name; }).join(', '));
     }
-    lines.push('Расчёт: ' + fmt(state.total) + ' – ' + fmt(state.totalMax) + ' ₽');
-    if (state.mode === 'both') lines.push('Выгода комплекта: ' + fmt(state.gift + state.discount) + ' ₽');
+    lines.push(state.byProject ? 'Расчёт: по проекту' : 'Расчёт: ' + fmt(state.total) + ' – ' + fmt(state.totalMax) + ' ₽');
     return lines.join('\n');
   }
 
   function quizPayload() {
     return {
       mode: state.mode,
-      area_m2: state.mode === 'stove' ? null : state.area,
-      volume_m3: state.mode === 'finish' ? null : state.volume,
+      area_m2: state.area,
+      volume_m3: volume(),
+      glass_m2: state.glass,
+      cold_wall: state.coldWall,
       steam_type: state.steamType,
       package: state.pkg,
       fuel: state.fuel,
       tier: state.tier,
       stove: state.stove ? state.stove.name : '',
       stove_price: state.stove ? state.stove.price : 0,
-      finish_options: [].concat(Array.from(state.finishOpts)),
-      stove_options: [].concat(Array.from(state.stoveOpts)),
+      finish_options: Array.from(state.finishOpts),
+      stove_options: Array.from(state.stoveOpts),
+      by_project: state.byProject,
       entry_product: QS.get('product') || '',
       estimate_min: state.total,
       estimate_max: state.totalMax,
-      bundle_saving: state.mode === 'both' ? (state.gift + state.discount) : 0,
       summary: summary(),
     };
   }
 
   /* ---- Модалка ----------------------------------------------------------- */
   var modal = null;
-
   var TIMINGS = [
     { id: 'now',   label: 'Уже сейчас' },
     { id: '1-3m',  label: 'В ближайшие 1–3 мес.' },
@@ -486,21 +470,18 @@
     var wrap = document.createElement('div');
     wrap.className = 'modal';
     wrap.setAttribute('hidden', '');
-    wrap.innerHTML = '' +
+    wrap.innerHTML =
       '<div class="modal__frame" role="dialog" aria-modal="true" aria-labelledby="modal-title">' +
         '<button type="button" class="modal__close" data-close aria-label="Закрыть">✕</button>' +
-        '<h3 class="modal__title" id="modal-title" data-modal-title>Пришлём расчёт в мессенджер</h3>' +
-        '<p class="modal__sub" data-modal-sub>Инженер пришлёт три варианта сметы и 3D-эскиз парной. Ответим в течение 30 минут в рабочее время.</p>' +
-
+        '<h3 class="modal__title" id="modal-title" data-modal-title></h3>' +
+        '<p class="modal__sub" data-modal-sub></p>' +
         '<div class="modal__summary" data-modal-summary></div>' +
-
         '<div class="modal__channels" data-channels>' +
-          '<button type="button" class="modal__chan" data-chan="whatsapp">WhatsApp</button>' +
-          '<button type="button" class="modal__chan" data-chan="telegram">Telegram</button>' +
-          '<button type="button" class="modal__chan" data-chan="max">MAX</button>' +
-          '<button type="button" class="modal__chan" data-chan="call">Звонок</button>' +
+          '<button type="button" class="modal__chan" data-chan="whatsapp"><b>WhatsApp</b></button>' +
+          '<button type="button" class="modal__chan" data-chan="telegram"><b>Telegram</b></button>' +
+          '<button type="button" class="modal__chan" data-chan="max"><b>MAX</b></button>' +
+          '<button type="button" class="modal__chan" data-chan="call"><b>Звонок</b></button>' +
         '</div>' +
-
         '<form data-form="lead" data-lead-source="calc" novalidate>' +
           '<input type="text" name="website" class="form-honey" tabindex="-1" autocomplete="off" aria-hidden="true">' +
           '<input type="hidden" name="channel" data-channel-input value="whatsapp">' +
@@ -509,12 +490,10 @@
             '<input class="input" type="text" name="name" placeholder="Как к вам обращаться" required minlength="2" autocomplete="name"></label>' +
           '<label class="field"><span class="field__label">Телефон</span>' +
             '<input class="input" type="tel" name="phone" placeholder="+7 (___) ___-__-__" required autocomplete="tel" inputmode="tel"></label>' +
-          '<div class="field">' +
-            '<span class="field__label">Когда планируете начать?</span>' +
+          '<div class="field"><span class="field__label">Когда планируете начать?</span>' +
             '<div class="chips chips--timing" data-timings>' +
               TIMINGS.map(function (t) { return '<button type="button" class="chip" data-timing="' + t.id + '">' + esc(t.label) + '</button>'; }).join('') +
-            '</div>' +
-          '</div>' +
+            '</div></div>' +
           '<button type="submit" class="btn btn--primary btn--lg btn--block">Получить расчёт</button>' +
           '<p class="policy">Нажимая кнопку, вы соглашаетесь с <a href="policy.html" target="_blank" rel="noopener">политикой обработки персональных данных</a>. Спама не будет.</p>' +
           '<div class="form-status" role="status" aria-live="polite"></div>' +
@@ -522,7 +501,6 @@
       '</div>';
 
     document.body.appendChild(wrap);
-
     wrap.addEventListener('click', function (e) { if (e.target === wrap) close(); });
     wrap.querySelector('[data-close]').addEventListener('click', close);
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !wrap.hasAttribute('hidden')) close(); });
@@ -545,17 +523,16 @@
       e.preventDefault();
       window.LuchLead.submit(form, { quiz: quizPayload() }, function () { success(wrap); });
     });
-
     return wrap;
   }
 
   function success(wrap) {
     wrap.querySelector('.modal__frame').innerHTML =
       '<button type="button" class="modal__close" data-close aria-label="Закрыть">✕</button>' +
-      '<div class="modal__success">' +
-        '<div class="modal__success-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="m9 16.17-4.17-4.17-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>' +
-        '<h3>Заявка принята</h3>' +
-        '<p>Инженер свяжется в течение 30 минут в рабочее время и пришлёт три варианта сметы с 3D-эскизом. Бесплатно и без обязательств.</p>' +
+      '<div class="quiz-success">' +
+        '<div class="quiz-success__icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="m9 16.17-4.17-4.17-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>' +
+        '<h3 class="quiz-success__title">Заявка принята</h3>' +
+        '<p class="quiz-success__text">Инженер свяжется в течение 30 минут в рабочее время и посчитает смету по вашей конфигурации.</p>' +
         '<a href="' + window.LuchLead.thanksUrl + '" class="btn btn--primary btn--lg btn--block">Хорошо</a>' +
       '</div>';
     wrap.querySelector('[data-close]').addEventListener('click', close);
@@ -571,8 +548,8 @@
     var call = state.channel === 'call';
     modal.querySelector('[data-modal-title]').textContent = call ? 'Перезвоним с расчётом' : 'Пришлём расчёт в мессенджер';
     modal.querySelector('[data-modal-sub]').textContent = call
-      ? 'Инженер позвонит в течение 30 минут в рабочее время и на словах даст вилку по вашей конфигурации.'
-      : 'Инженер пришлёт три варианта сметы и 3D-эскиз парной. Ответим в течение 30 минут в рабочее время.';
+      ? 'Инженер позвонит в течение 30 минут в рабочее время и на словах даст диапазон по вашей конфигурации.'
+      : 'Инженер пришлёт смету по вашей конфигурации. Ответим в течение 30 минут в рабочее время.';
   }
 
   function fillSummary() {
@@ -602,9 +579,10 @@
     document.body.classList.remove('is-locked');
   }
 
-  /* ---- Публичный API для кнопок вне калькулятора ------------------------- */
+  /* ---- Публичный API ----------------------------------------------------- */
   window.LuchCalc = {
     open: function (mode) {
+      if (mode === 'both' || mode === 'finish') mode = 'full';
       if (mode && MODES.some(function (m) { return m.id === mode; })) { state.mode = mode; render(); }
       var el = document.getElementById('calc');
       if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });

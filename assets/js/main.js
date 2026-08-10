@@ -53,7 +53,10 @@
     var box = $('[data-packages]');
     if (!box) return;
     box.innerHTML = P.packages.map(function (p) {
-      var forSix = p.pricePerM2 * 6;
+      // Цена зависит от типа парной: русская баня дороже финской сауны.
+      // У авторского пакета цены нет — он считается индивидуально.
+      var rates = p.pricePerM2;
+      var from = rates ? Math.min(rates.finnish, rates.russian) : 0;
       return '' +
       '<article class="pkg' + (p.popular ? ' pkg--popular' : '') + '" data-pkg-card="' + p.id + '">' +
         (p.popular ? '<span class="pkg__badge">Выбирают чаще всего</span>' : '') +
@@ -62,9 +65,13 @@
           '<p class="pkg__tagline">' + esc(p.tagline) + '</p>' +
         '</header>' +
         '<div class="pkg__price">' +
-          '<b>от ' + fmt(p.pricePerM2) + ' ₽</b><span>за м² парной</span>' +
+          (rates
+            ? '<b>от ' + fmt(from) + ' ₽</b><span>за м² парной</span>'
+            : '<b>По проекту</b><span>считаем индивидуально</span>') +
         '</div>' +
-        '<p class="pkg__example">Парная 6 м² — <b>от ' + fmt(forSix) + ' ₽</b></p>' +
+        (rates
+          ? '<p class="pkg__example">Финская сауна от ' + fmt(rates.finnish) + ' ₽/м², русская баня от ' + fmt(rates.russian) + ' ₽/м²</p>'
+          : '<p class="pkg__example">Состав работ и материалы каждый раз свои — цену называем после замера</p>') +
         '<p class="pkg__wood"><span>Материал</span>' + esc(p.wood) + '</p>' +
         '<ul class="pkg__list">' +
           p.includes.map(function (i) { return '<li>' + esc(i) + '</li>'; }).join('') +
@@ -72,7 +79,7 @@
         (p.notIncluded && p.notIncluded.length
           ? '<p class="pkg__not">Не входит: ' + p.notIncluded.map(esc).join(', ') + '</p>' : '') +
         '<button type="button" class="btn ' + (p.popular ? 'btn--primary' : 'btn--ghost') + ' btn--block" ' +
-          'data-open-pkg="' + p.id + '">Рассчитать в этом пакете</button>' +
+          'data-open-pkg="' + p.id + '">' + (rates ? 'Рассчитать в этом пакете' : 'Обсудить проект') + '</button>' +
       '</article>';
     }).join('');
 
@@ -80,7 +87,7 @@
       var b = e.target.closest('[data-open-pkg]');
       if (!b || !window.LuchCalc) return;
       window.LuchCalc.state.pkg = b.dataset.openPkg;
-      window.LuchCalc.open('finish');
+      window.LuchCalc.open('full');
     });
   })();
 
@@ -158,7 +165,10 @@
       if (s) {
         window.LuchCalc.state.fuel = s.fuel;
         window.LuchCalc.state.tier = s.tier;
-        window.LuchCalc.state.volume = Math.min(P.ranges.volume.max, Math.round((s.vmin + s.vmax) / 2));
+        // Переводим объём подобранной печи обратно в площадь пола
+        var area = ((s.vmin + s.vmax) / 2) / P.calcRules.ceilingHeight;
+        window.LuchCalc.state.area = Math.min(P.ranges.area.max,
+          Math.max(P.ranges.area.min, Math.round(area * 2) / 2));
       }
       window.LuchCalc.open('stove');
     });

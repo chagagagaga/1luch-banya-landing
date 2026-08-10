@@ -353,6 +353,8 @@ textarea.input { resize: vertical; min-height: 88px; }
 /* Радио-группы */
 .calc-radio { display: grid; grid-template-columns: repeat(3, 1fr); gap: .4rem; }
 .calc-radio--slim { grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); }
+.calc-radio--slim .calc-radio__opt { padding-inline: .3rem; min-width: 0; }
+.calc-radio--slim .calc-radio__opt b { font-size: .74rem; overflow-wrap: anywhere; }
 .calc-radio__opt {
   position: relative; display: flex; flex-direction: column; gap: .05rem;
   padding: .6rem .6rem; border: 1px solid var(--line); border-radius: var(--r-sm);
@@ -809,6 +811,8 @@ textarea.input { resize: vertical; min-height: 88px; }
   .calc-mode__best { position: static; margin-left: auto; }
   .calc-radio { grid-template-columns: minmax(0, 1fr); }
   .calc-radio--slim { grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); }
+.calc-radio--slim .calc-radio__opt { padding-inline: .3rem; min-width: 0; }
+.calc-radio--slim .calc-radio__opt b { font-size: .74rem; overflow-wrap: anywhere; }
   .calc-actions { grid-template-columns: minmax(0, 1fr); }
 
   .stoves__filters { gap: 1rem; }

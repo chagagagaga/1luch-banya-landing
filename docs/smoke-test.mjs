@@ -77,18 +77,29 @@ for (const [k, v] of Object.entries(render)) console.log(`  ${v ? '✓' : '✗'}
 /* ── Интерактив ─────────────────────────────────────────────────────── */
 const total0 = d.querySelector('[data-total]')?.textContent;
 
-click('[data-mode="finish"]');
-const finishOnly = !!d.querySelector('[data-area]') && !d.querySelector('[data-volume]');
+// Сценариев теперь два: «Только печь» и «Парная под ключ».
+// Отделки без печи не бывает — печь входит в оба варианта.
 click('[data-mode="stove"]');
-const stoveOnly = !!d.querySelector('[data-volume]') && !d.querySelector('[data-area]');
-click('[data-mode="both"]');
+const stoveOnly = !d.querySelector('[data-pkg-id]') && !!d.querySelector('[data-area]');
+click('[data-mode="full"]');
+const fullHasPkg = !!d.querySelector('[data-pkg-id]') && !!d.querySelector('[data-steam-id]');
 const pickShown = q('[data-pick]') > 0;
 
-const vol = d.querySelector('[data-volume]');
+// Считаем в квадратах, объём для печи выводится из площади
+const volShown = /м³/.test(d.querySelector('[data-vol]')?.textContent || '');
+
+const area = d.querySelector('[data-area]');
 const pickBefore = d.querySelector('.calc-pick__name')?.textContent;
-if (vol) { vol.value = 34; vol.dispatchEvent(new window.Event('input', { bubbles: true })); }
+if (area) { area.value = 18; area.dispatchEvent(new window.Event('input', { bubbles: true })); }
 const pickAfter = d.querySelector('.calc-pick__name')?.textContent;
 const totalAfter = d.querySelector('[data-total]')?.textContent;
+if (area) { area.value = 6; area.dispatchEvent(new window.Event('input', { bubbles: true })); }
+
+// Хамам делается только в авторском исполнении — цена по проекту
+click('[data-steam-id="hammam"]');
+const hammamAuthor = /по проекту/i.test(d.querySelector('[data-total]')?.textContent || '');
+click('[data-steam-id="russian"]');
+click('[data-pkg-id="comfort"]');
 
 const stovesBefore = q('.stove');
 click('[data-filter-fuel] [data-f="electric"]');
@@ -114,18 +125,17 @@ form.querySelector('[name=name]').value = '';
 form.dispatchEvent(new window.Event('submit', { bubbles: true, cancelable: true }));
 const validates = /обращаться/.test(form.querySelector('.form-status')?.textContent || '');
 
-// в ru-RU разряды разделяются неразрывным пробелом — нормализуем перед сверкой
-const startedOnFinish = /390 000/.test((total0 || '').replace(/\s/g, ' '));
-
 const attr = window.LuchAttribution ? window.LuchAttribution.getPayload() : {};
 const utmOk = attr?.last_touch?.marks?.utm_source === 'yandex' && attr?.last_touch?.marks?.yclid === 'test123';
 
 const checks = {
-  'вкладка «отделка» прячет объём':   finishOnly,
-  'в комплекте есть карточка печи':   pickShown,
-  'вкладка «печь» прячет площадь':    stoveOnly,
-  'объём меняет модель печи':         pickBefore !== pickAfter,
-  'объём пересчитывает итог':         total0 !== totalAfter,
+  'вкладка «печь» прячет пакеты':     stoveOnly,
+  'в «под ключ» есть тип и пакет':    fullHasPkg,
+  'карточка подобранной печи':        pickShown,
+  'объём выводится из площади':       volShown,
+  'площадь меняет модель печи':       pickBefore !== pickAfter,
+  'площадь пересчитывает итог':       total0 !== totalAfter,
+  'хамам считается по проекту':       hammamAuthor,
   'фильтр «электро» сужает выдачу':   stovesAfter > 0 && stovesAfter < stovesBefore,
   'модалка открывается':              modal && !modal.hasAttribute('hidden'),
   'в модалке есть сводка расчёта':    !!modal?.querySelector('.modal__summary-price'),
@@ -133,7 +143,6 @@ const checks = {
   'маска телефона работает':          masked,
   'валидация ловит пустое имя':       validates,
   'UTM и yclid захватываются':        utmOk,
-  'стартует с минимальной вилки':     startedOnFinish,
 };
 
 console.log('\n— Интерактив —');
