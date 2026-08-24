@@ -408,6 +408,44 @@
     document.head.appendChild(ld);
   })();
 
+  /* ═══ Типографика: неразрывные пробелы ════════════════════════════════
+     Русский текст на узком экране постоянно роняет предлог или союз на
+     следующую строку — «и», «в», «по» повисают в конце. Проходим по тексту
+     один раз после отрисовки и приклеиваем короткие слова к следующему.
+     Работает и для того, что собрано из pricing.js, поэтому вызываем в конце.
+     ═════════════════════════════════════════════════════════════════════ */
+  (function typography() {
+    // Предлоги, союзы и частицы, которые нельзя оставлять в конце строки
+    var SHORT = /(^|[\s(«"])([А-Яа-яЁё]{1,2}|из|под|над|при|про|без|для|как|что|это|уже|или|его|её|их)\s+/g;
+    // Число и единица измерения тоже должны жить на одной строке
+    var UNITS = /(\d)\s+(₽|м²|м³|мм|см|м|кг|шт|дней|дня|день|мес|лет|года|год|тыс|млн|°C|%)/g;
+
+    function fix(text) {
+      return text.replace(SHORT, '$1$2\u00A0').replace(UNITS, '$1\u00A0$2');
+    }
+
+    var SKIP = { SCRIPT: 1, STYLE: 1, TEXTAREA: 1, INPUT: 1, CODE: 1, PRE: 1 };
+
+    function walk(node) {
+      for (var n = node.firstChild; n; n = n.nextSibling) {
+        if (n.nodeType === 3) {
+          var t = fix(n.nodeValue);
+          if (t !== n.nodeValue) n.nodeValue = t;
+        } else if (n.nodeType === 1 && !SKIP[n.tagName]) {
+          walk(n);
+        }
+      }
+    }
+
+    ['.section__title', '.section__lead', '.hero__title', '.hero__sub', '.hero__badge',
+     '.why__card li', '.pkg__tagline', '.pkg__example', '.packages__note', '.stove__about',
+     '.step__body', '.gcard', '.bundle__list li', '.production__copy', '.production__gallery figcaption',
+     '.cta-mid__copy', '.qa__body', '.review blockquote', '.contacts__lead', '.calc__hint',
+     '.pw', '.pricewhy__base', '.why__bundle li', '.why__cta span',
+     '.calc__sub', '.calc__result-note', '.trustbar__proof p', '.offer__list li'
+    ].forEach(function (sel) { $$(sel).forEach(walk); });
+  })();
+
   /* ═══ Шапка, меню, плавный скролл ══════════════════════════════════════ */
   (function chrome() {
     var header = $('[data-header]');

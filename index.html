@@ -38,10 +38,10 @@
     </a>
 
     <nav class="nav" data-nav>
-      <a href="#packages">Отделка под ключ</a>
-      <a href="#stoves">Печи</a>
       <a href="#works">Работы</a>
-      <a href="#steps">Как работаем</a>
+      <a href="#packages">Отделка под ключ</a>
+      <a href="#pricewhy">Из чего цена</a>
+      <a href="#stoves">Печи</a>
       <a href="#reviews">Отзывы</a>
       <a href="#faq">Вопросы</a>
     </nav>
@@ -58,7 +58,6 @@
 </header>
 
 <main id="top">
-
 <!-- ═══════════════════════════════════════════════════════════════════════
      HERO + КОНФИГУРАТОР
      ═══════════════════════════════════════════════════════════════════ -->
@@ -80,8 +79,8 @@
       </h1>
 
       <p class="hero__sub">
-        Соберите конфигурацию — за минуту получите диапазон цены,
-        подбор печи под ваш объём парной и 3D-эскиз. Бесплатно.
+        Соберите конфигурацию — за минуту увидите диапазон цены и печь,
+        подобранную под объём вашей парной. Без звонка и регистрации.
       </p>
 
     </div>
@@ -100,10 +99,10 @@
 <section class="trustbar">
   <div class="container trustbar__inner">
     <ul class="trustbar__nums">
-      <li><b>15 лет</b><span>на рынке бань и печей</span></li>
+      <li><b>13 лет</b><span>на рынке бань и печей</span></li>
       <li><b>180+</b><span>парных сдано в МО</span></li>
       <li><b>12 мес.</b><span>гарантия на работы</span></li>
-      <li><b>10–15 дней</b><span>от демонтажа до пара</span></li>
+      <li><b>10–15 дней</b><span>от договора до первого пара</span></li>
     </ul>
     <div class="trustbar__proof">
       <div class="trustbar__avatars">
@@ -133,6 +132,117 @@
       <img src="assets/img/brands/kastor.webp"   alt="Kastor"   loading="lazy" width="120" height="40">
       <img src="assets/img/brands/cariitti.webp" alt="Cariitti" loading="lazy" width="120" height="40">
       <img src="assets/img/brands/klover.webp"   alt="Klover"   loading="lazy" width="120" height="40">
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     ПОРТФОЛИО
+     ═══════════════════════════════════════════════════════════════════ -->
+<section class="section works" id="works">
+  <div class="container">
+    <div class="section__head">
+      <span class="section__kicker">Наши работы</span>
+      <h2 class="section__title">Парные, которые мы сдали</h2>
+      <p class="section__lead">Реальные объекты в Москве, Подмосковье и соседних областях. Нажмите на карточку — откроется галерея.</p>
+    </div>
+
+    <div class="works__grid" data-works>
+      <!-- карточки рендерит assets/js/main.js из LUCH.works -->
+    </div>
+
+    <div class="works__more">
+      <button type="button" class="btn btn--ghost" data-works-more>Показать ещё объекты</button>
+      <button type="button" class="btn btn--primary" data-open-lead data-lead-source="works-cta">Хочу такую же — рассчитайте</button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     ПАКЕТЫ ОТДЕЛКИ
+     ═══════════════════════════════════════════════════════════════════ -->
+<section class="section packages" id="packages">
+  <div class="container">
+    <div class="section__head">
+      <span class="section__kicker">Отделка парной под ключ</span>
+      <h2 class="section__title">Три уровня отделки — от практичного до авторского</h2>
+      <p class="section__lead">
+        Цена — за готовую парную под ключ: материалы, работы и печь с монтажом.
+        Финская сауна <span class="nb"><b>от 500 000 ₽</b></span>,
+        русская парная <span class="nb"><b>от 850 000 ₽</b></span>.
+      </p>
+    </div>
+
+    <div class="packages__grid" data-packages>
+      <!-- карточки рендерит assets/js/main.js из LUCH.packages -->
+    </div>
+
+    <p class="packages__note">
+      На итоговую смету влияют объём парной, выбранная печь и инженерные решения.
+      Инженер посчитает точно после замера.
+    </p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     ИЗ ЧЕГО СКЛАДЫВАЕТСЯ ЦЕНА
+     ═══════════════════════════════════════════════════════════════════ -->
+<section class="section pricewhy" id="pricewhy">
+  <div class="container">
+    <div class="section__head">
+      <span class="section__kicker">Из чего складывается цена</span>
+      <h2 class="section__title">Почему одна парная стоит 850 000, а другая 2 500 000</h2>
+      <p class="section__lead">
+        Разница не в наценке, а в четырёх вещах. Вот они — чтобы вы понимали, за что платите,
+        ещё до разговора с менеджером.
+      </p>
+    </div>
+
+    <div class="pricewhy__grid">
+      <article class="pw">
+        <span class="pw__n">01</span>
+        <h3>Порода дерева</h3>
+        <p>Липа, ольха и осина — рабочая классика «Комфорта». Канадский кедр, новозеландская термососна,
+          необрезная доска и кело стоят кратно дороже и держат вид годами.</p>
+        <p class="pw__scale"><b>Комфорт</b> липа, ольха, осина, абаш <i>→</i> <b>Премиум</b> кедр, термососна, кело</p>
+      </article>
+
+      <article class="pw">
+        <span class="pw__n">02</span>
+        <h3>Объём парной</h3>
+        <p>Считаем по площади пола при высоте 2,4 м. Каждый квадратный метр стекла добавляет кубометр,
+          холодная или неутеплённая стена — плюс 50%. Больше объём — мощнее печь и больше материала.</p>
+        <p class="pw__scale"><b>6 м²</b> нижняя граница <i>→</i> <b>12 м²</b> и больше — верхняя</p>
+      </article>
+
+      <article class="pw">
+        <span class="pw__n">03</span>
+        <h3>Печь</h3>
+        <p>Печь входит во все пакеты, но печи разные. Стальная с закрытой каменкой даёт нормальный лёгкий пар.
+          Теплоаккумулирующая в натуральном камне держит режим часами — и стоит соответственно.</p>
+        <p class="pw__scale"><b>Сталь</b> закрытая каменка <i>→</i> <b>Камень</b> теплоаккумулирующая</p>
+      </article>
+
+      <article class="pw">
+        <span class="pw__n">04</span>
+        <h3>Инженерия и декор</h3>
+        <p>Сценарный свет, соляная стена, натуральный камень, гнутые элементы, ароматизация, звёздное небо.
+          Это не обязательная часть — это то, ради чего заказывают авторский проект.</p>
+        <p class="pw__scale"><b>Базовая</b> вентиляция и свет <i>→</i> <b>Авторская</b> камень, гнутьё, сценарии</p>
+      </article>
+    </div>
+
+    <div class="pricewhy__base">
+      <h3>Что входит в любой пакет, даже в самый доступный</h3>
+      <ul>
+        <li>Печь с монтажом и дымоходом</li>
+        <li>Пароизоляция фольгой, стены 50 мм, потолок 100 мм</li>
+        <li>Приточная и вытяжная вентиляция</li>
+        <li>Термостойкая электрика и светильник</li>
+        <li>Скруглённые кромки, скрытый крепёж</li>
+        <li>Гарантия 12 месяцев на работы</li>
+      </ul>
+      <button type="button" class="btn btn--primary" data-open-calc-tab="full">Посчитать свою парную</button>
     </div>
   </div>
 </section>
@@ -170,32 +280,20 @@
         <a href="#calc" class="btn btn--ghost btn--sm js-scroll">Собрать конфигурацию</a>
       </article>
     </div>
-  </div>
-</section>
 
-<!-- ═══════════════════════════════════════════════════════════════════════
-     ПАКЕТЫ ОТДЕЛКИ
-     ═══════════════════════════════════════════════════════════════════ -->
-<section class="section packages" id="packages">
-  <div class="container">
-    <div class="section__head">
-      <span class="section__kicker">Отделка парной под ключ</span>
-      <h2 class="section__title">Три уровня отделки — от практичного до авторского</h2>
-      <p class="section__lead">
-        Цена — за готовую парную под ключ: материалы, работы и печь с монтажом.
-        Финская сауна <span class="nb"><b>от 500 000 ₽</b></span>,
-        русская парная <span class="nb"><b>от 850 000 ₽</b></span>.
-      </p>
+    <!-- Бывшая секция «Комплект»: та же мысль, что и в карточках выше,
+         поэтому не отдельный экран, а короткая полоса под ними. -->
+    <ul class="why__bundle">
+        <li><b>Печь входит</b> во все варианты отделки — от «Комфорта» до авторского</li>
+        <li><b>Один договор</b> и одна ответственность за результат</li>
+        <li><b>3D-проект в подарок</b> при покупке печи. Отдельно — 10 000 ₽</li>
+        <li><b>12 месяцев</b> гарантии на работы, на печь — гарантия производителя</li>
+      </ul>
+
+    <div class="why__cta">
+      <button type="button" class="btn btn--primary btn--lg" data-open-calc-tab="full">Посчитать парную под ключ</button>
+      <span>Диапазон цены и подбор печи — за минуту, без звонка</span>
     </div>
-
-    <div class="packages__grid" data-packages>
-      <!-- карточки рендерит assets/js/main.js из LUCH.packages -->
-    </div>
-
-    <p class="packages__note">
-      На итоговую смету влияют объём парной, выбранная печь и инженерные решения.
-      Инженер посчитает точно после замера.
-    </p>
   </div>
 </section>
 
@@ -279,105 +377,6 @@
 </section>
 
 <!-- ═══════════════════════════════════════════════════════════════════════
-     КОМПЛЕКТ: ПЕЧЬ + ОТДЕЛКА
-     ═══════════════════════════════════════════════════════════════════ -->
-<section class="section bundle">
-  <div class="container bundle__inner">
-    <div class="bundle__copy">
-      <span class="section__kicker">Почему печь входит в отделку</span>
-      <h2 class="section__title">Отделки без печи не бывает</h2>
-      <p>
-        Печь задаёт всё остальное: объём парной, схему вентиляции, расположение полков
-        и противопожарные отступы. Поэтому мы делаем либо печь отдельно, либо полную
-        отделку вместе с печью. Обшить помещение вагонкой без расчёта печи — это
-        не парная, и отвечать за результат в таком варианте мы не станем.
-      </p>
-      <ul class="bundle__list">
-        <li><b>Печь входит</b> во все варианты отделки — от «Комфорта» до авторского</li>
-        <li><b>Один договор</b> и одна ответственность за результат</li>
-        <li><b>3D-проект в подарок</b> при покупке печи. Отдельно — 10 000 ₽</li>
-        <li><b>12 месяцев</b> гарантии на работы, на печь — гарантия производителя</li>
-      </ul>
-      <button type="button" class="btn btn--primary btn--lg" data-open-calc-tab="full">Посчитать парную под ключ</button>
-    </div>
-    <div class="bundle__media">
-      <img src="assets/img/works/selco-1.webp" alt="Парная под ключ с печью в каменном кожухе" loading="lazy" width="800" height="600">
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════════════════════════════════════════════════════════════════
-     ПОРТФОЛИО
-     ═══════════════════════════════════════════════════════════════════ -->
-<section class="section works" id="works">
-  <div class="container">
-    <div class="section__head">
-      <span class="section__kicker">Наши работы</span>
-      <h2 class="section__title">Парные, которые мы сдали</h2>
-      <p class="section__lead">Реальные объекты в Москве, Подмосковье и соседних областях. Нажмите на карточку — откроется галерея.</p>
-    </div>
-
-    <div class="works__grid" data-works>
-      <!-- карточки рендерит assets/js/main.js из LUCH.works -->
-    </div>
-
-    <div class="works__more">
-      <button type="button" class="btn btn--ghost" data-works-more>Показать ещё объекты</button>
-      <button type="button" class="btn btn--primary" data-open-lead data-lead-source="works-cta">Хочу такую же — рассчитайте</button>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════════════════════════════════════════════════════════════════
-     ЛИД-МАГНИТ: ПОДБОРКА ПРОЕКТОВ
-     ═══════════════════════════════════════════════════════════════════ -->
-<!-- ═══════════════════════════════════════════════════════════════════════
-     ВИДЕО
-     ═══════════════════════════════════════════════════════════════════ -->
-<section class="section videos" id="videos">
-  <div class="container">
-    <div class="section__head">
-      <span class="section__kicker">Видео с объектов</span>
-      <h2 class="section__title">Посмотрите, как выглядят сданные парные</h2>
-    </div>
-    <div class="videos__grid" data-videos>
-      <!-- фасады рендерит assets/js/main.js -->
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════════════════════════════════════════════════════════════════
-     ОТЗЫВЫ
-     ═══════════════════════════════════════════════════════════════════ -->
-<section class="section reviews" id="reviews">
-  <div class="container">
-    <div class="section__head">
-      <span class="section__kicker">Отзывы</span>
-      <h2 class="section__title">Что говорят заказчики</h2>
-    </div>
-    <div class="reviews__grid" data-reviews>
-      <!-- карточки рендерит assets/js/main.js -->
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════════════════════════════════════════════════════════════════
-     ЭТАПЫ
-     ═══════════════════════════════════════════════════════════════════ -->
-<section class="section steps" id="steps">
-  <div class="container">
-    <div class="section__head">
-      <span class="section__kicker">Как мы работаем</span>
-      <h2 class="section__title">8 шагов от звонка до первого пара</h2>
-      <p class="section__lead">Стандартная парная — 10–15 рабочих дней. Каждый этап закрывается актом, оплата идёт по факту.</p>
-    </div>
-    <ol class="steps__list" data-steps>
-      <!-- шаги рендерит assets/js/main.js из LUCH.steps -->
-    </ol>
-  </div>
-</section>
-
-<!-- ═══════════════════════════════════════════════════════════════════════
      ПРОИЗВОДСТВО
      ═══════════════════════════════════════════════════════════════════ -->
 <section class="section production" id="production">
@@ -457,24 +456,71 @@
 </section>
 
 <!-- ═══════════════════════════════════════════════════════════════════════
-     ПРОМЕЖУТОЧНЫЙ CTA
+     ОТЗЫВЫ
+     ═══════════════════════════════════════════════════════════════════ -->
+<section class="section reviews" id="reviews">
+  <div class="container">
+    <div class="section__head">
+      <span class="section__kicker">Отзывы</span>
+      <h2 class="section__title">Что говорят заказчики</h2>
+    </div>
+    <div class="reviews__grid" data-reviews>
+      <!-- карточки рендерит assets/js/main.js -->
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     ВИДЕО
+     ═══════════════════════════════════════════════════════════════════ -->
+<section class="section videos" id="videos">
+  <div class="container">
+    <div class="section__head">
+      <span class="section__kicker">Видео с объектов</span>
+      <h2 class="section__title">Посмотрите, как выглядят сданные парные</h2>
+    </div>
+    <div class="videos__grid" data-videos>
+      <!-- фасады рендерит assets/js/main.js -->
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     ЭТАПЫ
+     ═══════════════════════════════════════════════════════════════════ -->
+<section class="section steps" id="steps">
+  <div class="container">
+    <div class="section__head">
+      <span class="section__kicker">Как мы работаем</span>
+      <h2 class="section__title">8 шагов от звонка до первого пара</h2>
+      <p class="section__lead">Стандартная парная — 10–15 рабочих дней. Материалы оплачиваются при заказе, работы — 50% при выходе монтажников, остаток по сдаче.</p>
+    </div>
+    <ol class="steps__list" data-steps>
+      <!-- шаги рендерит assets/js/main.js из LUCH.steps -->
+    </ol>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     ОФФЕР + ФОРМА
      ═══════════════════════════════════════════════════════════════════ -->
 <section class="section cta-mid">
   <div class="container cta-mid__inner">
     <div class="cta-mid__copy">
-      <h2>Не хотите считать сами?</h2>
-      <p>
-        Инженер приедет с образцами материалов, замерит парную, проверит вентиляцию и дымоход
-        и на месте назовёт диапазон цены. Выезд по Москве — 5 000 ₽, по области 5 000 ₽ плюс 35 ₽ за километр.
-      </p>
-      <ul class="cta-mid__list">
-        <li>Выезд инженера: Москва 5 000 ₽, область 5 000 ₽ + 35 ₽/км</li>
-        <li>Смета по вашей конфигурации в течение суток</li>
-        <li>3D-проект в подарок при покупке печи, отдельно — 10 000 ₽</li>
+      <h2>Что вы получите, оставив заявку</h2>
+      <ul class="offer__list">
+        <li><b>Смету по вашей конфигурации за сутки</b><span>Бесплатно и без выезда — достаточно размеров парной или пары фото</span></li>
+        <li><b>Подбор печи под объём</b><span>С расчётом: площадь, стекло, холодные стены, вентиляция</span></li>
+        <li><b>Приглашение в шоурум</b><span>Новорижское шоссе: печи, облицовки и образцы дерева можно потрогать до договора</span></li>
+        <li><b>3D-проект в подарок при покупке печи</b><span>Отдельно 3D-проект стоит 10 000 ₽</span></li>
       </ul>
+      <p class="cta-mid__fineprint">
+        Выезд инженера на замер — отдельно: по Москве 5 000 ₽, по области 5 000 ₽ плюс 35 ₽ за километр.
+        Смета и подбор печи ничего не стоят.
+      </p>
     </div>
     <form class="cta-mid__form" data-form="lead" data-lead-source="cta-mid" novalidate>
-      <h3>Вызвать инженера на замер</h3>
+      <h3>Получить смету по вашей парной</h3>
       <input type="text" name="website" class="form-honey" tabindex="-1" autocomplete="off" aria-hidden="true">
       <label class="field">
         <span class="field__label">Как к вам обращаться</span>
@@ -484,7 +530,7 @@
         <span class="field__label">Телефон или WhatsApp</span>
         <input class="input" type="tel" name="phone" placeholder="+7 (___) ___-__-__" required autocomplete="tel" inputmode="tel">
       </label>
-      <button type="submit" class="btn btn--primary btn--lg btn--block">Записаться на замер</button>
+      <button type="submit" class="btn btn--primary btn--lg btn--block">Получить смету</button>
       <p class="policy">Нажимая кнопку, вы соглашаетесь с <a href="policy.html" target="_blank" rel="noopener">политикой обработки персональных данных</a>. Спама не будет.</p>
       <div class="form-status" role="status" aria-live="polite"></div>
     </form>
@@ -574,9 +620,10 @@
     </div>
     <nav class="footer__nav">
       <h4>Разделы</h4>
-      <a href="#packages">Отделка под ключ</a>
-      <a href="#stoves">Банные печи</a>
       <a href="#works">Наши работы</a>
+      <a href="#packages">Отделка под ключ</a>
+      <a href="#pricewhy">Из чего складывается цена</a>
+      <a href="#stoves">Банные печи</a>
       <a href="#steps">Этапы работ</a>
       <a href="#faq">Вопросы и ответы</a>
     </nav>

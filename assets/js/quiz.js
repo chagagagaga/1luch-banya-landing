@@ -52,6 +52,7 @@
     steamType: 'russian',
     pkg: paramOneOf('pkg', ['comfort', 'premium', 'author'], 'comfort'),
     stoveOpts: new Set(P.stoveOptions.filter(function (o) { return o.default; }).map(function (o) { return o.id; })),
+    stoveTune: false,              // раскрыт ли блок настройки печи
     finishOpts: new Set(),
     channel: 'whatsapp',
     stove: null,
@@ -281,23 +282,6 @@
         '</details>'
       ) : '') +
 
-      '<div class="calc__field calc__field--row">' +
-        '<div>' +
-          '<span class="calc__label">Топливо</span>' +
-          '<div class="calc-radio calc-radio--slim" data-fuel>' +
-            '<button type="button" class="calc-radio__opt' + (state.fuel === 'wood' ? ' is-on' : '') + '" data-fuel-id="wood"><b>Дрова</b></button>' +
-            '<button type="button" class="calc-radio__opt' + (state.fuel === 'electric' ? ' is-on' : '') + '" data-fuel-id="electric"><b>Электро</b></button>' +
-          '</div>' +
-        '</div>' +
-        '<div>' +
-          '<span class="calc__label">Класс печи</span>' +
-          '<div class="calc-radio calc-radio--slim" data-tier>' +
-            TIERS.map(function (t) {
-              return '<button type="button" class="calc-radio__opt' + (state.tier === t.id ? ' is-on' : '') + '" data-tier-id="' + t.id + '"><b>' + esc(t.label) + '</b></button>';
-            }).join('') +
-          '</div>' +
-        '</div>' +
-      '</div>' +
 
       (state.stove ? (
         '<div class="calc-pick" data-pick>' +
@@ -311,8 +295,34 @@
         '</div>'
       ) : '') +
 
-      '<details class="calc__more"' + (state.stoveOpts.size ? ' open' : '') + '>' +
-        '<summary>Обвязка и монтаж <span>(' + state.stoveOpts.size + ')</span></summary>' +
+      /* Топливо, класс печи и обвязка спрятаны под один раскрывающийся блок:
+         печь подбирается автоматически, и большинству эти поля не нужны.
+         Каждое лишнее видимое поле — это минус к доле дошедших до цены. */
+      '<details class="calc__more"' + (state.stoveTune || state.stoveOpts.size ? ' open' : '') + ' data-stove-tune>' +
+        '<summary>Настроить печь <span>' +
+          esc(state.fuel === 'wood' ? 'дрова' : 'электро') +
+          (state.stoveOpts.size ? ' · +' + state.stoveOpts.size : '') +
+        '</span></summary>' +
+
+        '<div class="calc__field calc__field--row" style="margin-top:.8rem">' +
+          '<div>' +
+            '<span class="calc__label">Топливо</span>' +
+            '<div class="calc-radio calc-radio--slim" data-fuel>' +
+              '<button type="button" class="calc-radio__opt' + (state.fuel === 'wood' ? ' is-on' : '') + '" data-fuel-id="wood"><b>Дрова</b></button>' +
+              '<button type="button" class="calc-radio__opt' + (state.fuel === 'electric' ? ' is-on' : '') + '" data-fuel-id="electric"><b>Электро</b></button>' +
+            '</div>' +
+          '</div>' +
+          '<div>' +
+            '<span class="calc__label">Класс печи</span>' +
+            '<div class="calc-radio calc-radio--slim" data-tier>' +
+              TIERS.map(function (t) {
+                return '<button type="button" class="calc-radio__opt' + (state.tier === t.id ? ' is-on' : '') + '" data-tier-id="' + t.id + '"><b>' + esc(t.label) + '</b></button>';
+              }).join('') +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+
+        '<span class="calc__label">Обвязка и монтаж</span>' +
         '<div class="calc-opts" data-stove-opts>' +
           P.stoveOptions.map(function (o) { return optionRow(o, state.stoveOpts.has(o.id)); }).join('') +
         '</div>' +
@@ -429,6 +439,9 @@
       var b = e.target.closest('[data-opt]'); if (!b) return;
       toggle(state.stoveOpts, b.dataset.opt); b.classList.toggle('is-on'); updateResult();
     });
+
+    var tune = root.querySelector('[data-stove-tune]');
+    if (tune) tune.addEventListener('toggle', function () { state.stoveTune = tune.open; });
 
     root.querySelectorAll('[data-cta]').forEach(function (b) {
       b.addEventListener('click', function () { state.channel = b.dataset.cta; openModal(); });

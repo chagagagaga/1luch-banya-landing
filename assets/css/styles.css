@@ -118,6 +118,11 @@ input, textarea, select, button { font-family: inherit; font-size: inherit; }
 :focus-visible { outline: 2px solid var(--fire); outline-offset: 3px; border-radius: 2px; }
 
 .container { width: 100%; max-width: var(--container); margin-inline: auto; padding-inline: var(--pad-x); }
+
+/* Заголовок не должен ронять последнее слово на отдельную строку, абзац —
+   заканчиваться одиноким предлогом. Браузеры без text-wrap просто игнорируют. */
+h1, h2, h3, .section__title, .hero__title, .pkg__name, .step__body h3, .gcard h3 { text-wrap: balance; }
+p, li, .section__lead, .hero__sub, figcaption { text-wrap: pretty; }
 .section { padding-block: var(--section-y); }
 
 .section__head { max-width: 680px; margin-inline: auto; text-align: center; margin-bottom: clamp(1.75rem, 1rem + 2.4vw, 3.25rem); }
@@ -537,8 +542,56 @@ textarea.input { resize: vertical; min-height: 88px; }
 .stoves__cta h3 { font-size: var(--fs-h3); }
 .stoves__cta p { margin-top: .5rem; font-size: var(--fs-sm); color: var(--text-invert-soft); max-width: 58ch; }
 
+/* ── Полоса «печь входит везде» под карточками сравнения ─────────────────
+   Раньше это была отдельная секция «Комплект» — она повторяла мысль соседнего
+   блока и удлиняла путь до цены. Осталась короткой полосой с кнопкой. */
+.why__bundle {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: .9rem 1.5rem; margin-top: var(--gap);
+  padding: 1.35rem clamp(1.1rem, .8rem + 1vw, 1.75rem);
+  border-radius: var(--r-lg); background: var(--paper-3);
+}
+.why__bundle li { display: flex; gap: .5rem; align-items: baseline; font-size: var(--fs-sm); color: var(--text-soft); }
+.why__bundle b { flex: none; color: var(--ink); font-weight: 700; }
+.why__cta { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: .75rem 1.25rem; margin-top: var(--gap); }
+.why__cta span { font-size: var(--fs-sm); color: var(--text-soft); }
+
 /* ═══════════════════════════════════════════════════════════════════════════
-   11. КОМПЛЕКТ
+   ИЗ ЧЕГО СКЛАДЫВАЕТСЯ ЦЕНА
+   ─────────────────────────────────────────────────────────────────────────
+   Диапазон 850 000 – 2 500 000 без объяснения читается как «не знаю сколько».
+   Этот блок отвечает на «почему так дорого» до разговора с менеджером.
+   ═════════════════════════════════════════════════════════════════════════ */
+.pricewhy { background: var(--paper-2); }
+.pricewhy__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(272px, 1fr)); gap: var(--gap); }
+.pw { position: relative; padding: clamp(1.3rem, 1rem + 1vw, 1.85rem); border-radius: var(--r-lg); background: #fff; border: 1px solid var(--line); }
+.pw__n { font-family: var(--font-display); font-size: .8rem; font-weight: 700; letter-spacing: .1em; color: var(--stone); }
+.pw h3 { margin-top: .5rem; font-size: 1.1rem; }
+.pw p { margin-top: .6rem; font-size: var(--fs-sm); color: var(--text-soft); line-height: 1.55; }
+.pw__scale { margin-top: .9rem !important; padding-top: .8rem; border-top: 1px solid var(--line); font-size: var(--fs-xs) !important; }
+.pw__scale b { color: var(--text); font-weight: 700; }
+.pw__scale i { font-style: normal; color: var(--stone); padding-inline: .25em; }
+.pricewhy__base {
+  display: grid; gap: 1rem; margin-top: var(--gap);
+  padding: clamp(1.3rem, 1rem + 1.4vw, 2.25rem); border-radius: var(--r-lg);
+  background: var(--ink); color: var(--text-invert);
+}
+.pricewhy__base h3 { font-size: var(--fs-h3); }
+.pricewhy__base ul { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: .5rem 1.5rem; }
+.pricewhy__base li { position: relative; padding-left: 1.4rem; font-size: var(--fs-sm); color: var(--text-invert-soft); }
+.pricewhy__base li::before { content: '✓'; position: absolute; left: 0; color: var(--amber); font-weight: 700; }
+.pricewhy__base .btn { justify-self: start; }
+
+/* ── Оффер в блоке с формой ──────────────────────────────────────────────── */
+.offer__list { display: grid; gap: .9rem; margin-top: 1.25rem; }
+.offer__list li { display: flex; flex-direction: column; gap: .15rem; padding-left: 1.5rem; position: relative; }
+.offer__list li::before { content: '✓'; position: absolute; left: 0; top: .05em; color: var(--amber); font-weight: 700; }
+.offer__list b { font-size: 1rem; }
+.offer__list span { font-size: var(--fs-sm); color: var(--text-invert-soft); line-height: 1.5; }
+.cta-mid__fineprint { margin-top: 1.25rem; font-size: var(--fs-xs); color: var(--text-invert-soft); line-height: 1.5; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   11. КОМПЛЕКТ (секции больше нет, стили нужны лендингу-близнецу)
    ═════════════════════════════════════════════════════════════════════════ */
 .bundle { background: var(--paper-2); }
 .bundle__inner { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: clamp(1.5rem, 1rem + 2.5vw, 3.5rem); align-items: center; }
@@ -633,7 +686,7 @@ textarea.input { resize: vertical; min-height: 88px; }
 /* ═══════════════════════════════════════════════════════════════════════════
    16. ПРОИЗВОДСТВО
    ═════════════════════════════════════════════════════════════════════════ */
-.production__inner { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: clamp(1.5rem, 1rem + 2.5vw, 3.5rem); align-items: center; }
+.production__inner { display: grid; grid-template-columns: minmax(300px, 5fr) minmax(320px, 7fr); gap: clamp(1.5rem, 1rem + 2.5vw, 3.5rem); align-items: center; }
 .production__copy p { margin-top: 1rem; color: var(--text-soft); font-size: var(--fs-lead); }
 .production__facts { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1.75rem; }
 .production__facts li { display: flex; flex-direction: column; padding-left: .9rem; border-left: 1px solid var(--line); }
@@ -832,9 +885,51 @@ textarea.input { resize: vertical; min-height: 88px; }
   .footer__bottom { flex-direction: column; }
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   МОБИЛЬНАЯ ВЁРСТКА: ширина карточек, ряды по два, фильтры
+   ─────────────────────────────────────────────────────────────────────────
+   Сетки собраны на флексе с min-width 272–300 px и центрированием. На узком
+   экране это давало карточку в 280 px посреди 356 px контейнера — по бокам
+   висел воздух, а страница становилась вдвое длиннее нужного. Ниже сетки
+   переводятся на честную ширину: текстовые блоки на всю, визуальные по два
+   в ряд.
+   ═════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 720px) {
+  /* Поля контейнера ужимаем: на телефоне каждый пиксель ширины на счету */
+  :root { --pad-x: 1rem; }
+
+  /* Во всю ширину — там, где карточка это текст и её нельзя резать пополам */
+  .packages__grid > *,
+  .stoves__grid > *,
+  .reviews__grid > *,
+  .steps__list > *,
+  .why__grid > * { flex: 1 1 100%; min-width: 0; }
+
+  /* По два в ряд — там, где карточка это в первую очередь картинка */
+  .works__grid > *,
+  .videos__grid > *,
+  .guarantees__grid > * { flex: 0 1 calc((100% - var(--gap)) / 2); min-width: 0; }
+
+  /* Фильтры печей: подписи по левому краю, чипы равной ширины ровной сеткой.
+     Раньше они центрировались и рассыпались рваными рядами. */
+  .stoves__filters { flex-direction: column; align-items: stretch; gap: 1rem; }
+  .filter-group { align-items: stretch; gap: .4rem; }
+  .filter-group__label { text-align: left; }
+  .stoves__filters .chips {
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .4rem; justify-content: stretch;
+  }
+  .stoves__filters .chip { padding: .55em .4em; text-align: center; font-size: .8rem; }
+
+  /* Галерея цеха на всю ширину блока */
+  .production__gallery { gap: .5rem; }
+}
+
 @media (max-width: 420px) {
   .hero__usp { grid-template-columns: minmax(0, 1fr); }
   .modal__channels { grid-template-columns: minmax(0, 1fr); }
+  /* Совсем узкий экран: чипов по два, иначе текст в них не помещается */
+  .stoves__filters .chips { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 /* Печать — на всякий случай, если менеджер распечатает смету */
@@ -975,6 +1070,7 @@ textarea.input { resize: vertical; min-height: 88px; }
 
 /* ── 25.10 Мобильная версия ─────────────────────────────────────────────── */
 @media (max-width: 980px) {
+  .production__inner { grid-template-columns: minmax(0, 1fr); }
   .trustbar__inner { grid-template-columns: minmax(0, 1fr); }
   .magnet__inner { grid-template-columns: minmax(0, 1fr); }
   .magnet__media { order: -1; }
