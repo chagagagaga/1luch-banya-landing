@@ -359,13 +359,34 @@
   (function faq() {
     var box = $('[data-faq]');
     if (!box) return;
+    // Длинная простыня вопросов режет конверсию: сразу показываем шесть,
+    // которые снимают деньги, сроки и риски. Остальные — по кнопке.
+    var VISIBLE = 6;
     box.innerHTML = P.faq.map(function (item, i) {
       return '' +
-      '<details class="qa"' + (i === 0 ? ' open' : '') + '>' +
+      '<details class="qa' + (i >= VISIBLE ? ' qa--extra' : '') + '"' +
+        (i === 0 ? ' open' : '') + (i >= VISIBLE ? ' hidden' : '') + '>' +
         '<summary><span>' + esc(item.q) + '</span><i aria-hidden="true"></i></summary>' +
         '<div class="qa__body"><p>' + esc(item.a) + '</p></div>' +
       '</details>';
     }).join('');
+
+    if (P.faq.length > VISIBLE) {
+      var more = document.createElement('button');
+      more.type = 'button';
+      more.className = 'btn btn--ghost btn--block faq__more';
+      var rest = P.faq.length - VISIBLE;
+      var tail = rest % 10, tens = rest % 100;
+      var word = (tail === 1 && tens !== 11) ? 'вопрос'
+               : (tail >= 2 && tail <= 4 && (tens < 12 || tens > 14)) ? 'вопроса'
+               : 'вопросов';
+      more.textContent = 'Ещё ' + rest + ' ' + word;
+      more.addEventListener('click', function () {
+        $$('.qa--extra', box).forEach(function (d) { d.hidden = false; });
+        more.remove();
+      });
+      box.appendChild(more);
+    }
 
     // аккордеон: открыт только один
     box.addEventListener('toggle', function (e) {

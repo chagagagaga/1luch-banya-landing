@@ -300,7 +300,7 @@ textarea.input { resize: vertical; min-height: 88px; }
 .calc__noscript { padding: 1rem; }
 
 .calc__field { margin-bottom: 1.15rem; }
-.calc__field--row { display: grid; grid-template-columns: auto 1fr; gap: .9rem; }
+.calc__field--row { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: .9rem; }
 .calc__label {
   display: flex; align-items: center; gap: .5rem; flex-wrap: wrap;
   font-size: var(--fs-xs); font-weight: 700; text-transform: uppercase; letter-spacing: .07em;
@@ -354,7 +354,7 @@ textarea.input { resize: vertical; min-height: 88px; }
 .calc-radio { display: grid; grid-template-columns: repeat(3, 1fr); gap: .4rem; }
 .calc-radio--slim { grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); }
 .calc-radio--slim .calc-radio__opt { padding-inline: .3rem; min-width: 0; }
-.calc-radio--slim .calc-radio__opt b { font-size: .74rem; overflow-wrap: anywhere; }
+.calc-radio--slim .calc-radio__opt b { font-size: .74rem; white-space: nowrap; }
 .calc-radio__opt {
   position: relative; display: flex; flex-direction: column; gap: .05rem;
   padding: .6rem .6rem; border: 1px solid var(--line); border-radius: var(--r-sm);
@@ -688,6 +688,8 @@ textarea.input { resize: vertical; min-height: 88px; }
 .qa summary i::after { top: 0; bottom: 0; left: 9px; width: 2px; }
 .qa[open] summary i::after { transform: scaleY(0); }
 .qa__body { padding: 0 1.3rem 1.25rem; }
+/* Кнопка «Ещё вопросы»: список открывается по клику, чтобы блок не был простынёй. */
+.faq__more { margin-top: .2rem; }
 .qa__body p { font-size: var(--fs-sm); color: var(--text-soft); line-height: 1.65; }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -817,7 +819,7 @@ textarea.input { resize: vertical; min-height: 88px; }
   .calc-radio { grid-template-columns: minmax(0, 1fr); }
   .calc-radio--slim { grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); }
 .calc-radio--slim .calc-radio__opt { padding-inline: .3rem; min-width: 0; }
-.calc-radio--slim .calc-radio__opt b { font-size: .74rem; overflow-wrap: anywhere; }
+.calc-radio--slim .calc-radio__opt b { font-size: .74rem; white-space: nowrap; }
   .calc-actions { grid-template-columns: minmax(0, 1fr); }
 
   .stoves__filters { gap: 1rem; }
