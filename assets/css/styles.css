@@ -639,8 +639,13 @@ textarea.input { resize: vertical; min-height: 88px; }
 .production__facts li { display: flex; flex-direction: column; padding-left: .9rem; border-left: 1px solid var(--line); }
 .production__facts b { font-size: 1rem; }
 .production__facts span { font-size: var(--fs-xs); color: var(--text-soft); line-height: 1.35; }
-.production__gallery { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+.production__gallery { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem 1rem; }
+.production__gallery figure { display: flex; flex-direction: column; gap: .5rem; }
 .production__gallery img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: var(--r); }
+/* Подпись превращает картинку в довод: каждый кадр отвечает за свой тезис. */
+.production__gallery figcaption { font-size: var(--fs-xs); line-height: 1.35; color: var(--text-soft); }
+.production__cta { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem 1rem; margin-top: 1.75rem; }
+.production__cta span { flex: 1 1 14rem; font-size: var(--fs-xs); color: var(--text-soft); line-height: 1.35; }
 
 /* ═══════════════════════════════════════════════════════════════════════════
    17. ГАРАНТИИ
