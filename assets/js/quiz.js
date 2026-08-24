@@ -79,7 +79,10 @@
   // Диапазон цены. Каждая сумма — неразрывный кусок вместе со знаком рубля,
   // перенос возможен только по тире.
   function rangeHtml() {
-    if (state.byProject) return '<i>Цена по проекту</i>';
+    // Авторский проект и хамам: верхней границы нет, называем точку входа.
+    if (state.byProject) {
+      return state.total ? '<i>от ' + fmt(state.total) + '&nbsp;₽</i>' : '<i>Цена по проекту</i>';
+    }
     return '<i>' + fmt(state.total) + '</i>&#8201;–&#8201;<i>' + fmt(state.totalMax) + '&nbsp;₽</i>';
   }
 
@@ -120,6 +123,16 @@
     return P.packages.filter(function (p) { return p.id === state.pkg; })[0] || P.packages[0];
   }
 
+  /* ---- Диапазон прайса под выбранный тип парной --------------------------
+     Прайс Влада — главная цифра. Расчёт по метрам только двигает цену внутри
+     диапазона: ниже нижней границы калькулятор уйти не может.
+  ------------------------------------------------------------------------- */
+  function priceBand(pkg) {
+    var b = pkg && pkg.projectPrice;
+    if (!b) return null;
+    return b[state.steamType] || b.russian || null;
+  }
+
   /* ---- Расчёт ------------------------------------------------------------ */
   function calc() {
     state.stove = pickStove();
@@ -138,8 +151,16 @@
     }
 
     var pkg = currentPkg();
-    // Авторский проект и хамам не тарифицируются за метр — считаем индивидуально
-    if (!pkg.pricePerM2) { state.byProject = true; state.total = 0; state.totalMax = 0; return; }
+    var band = priceBand(pkg);
+
+    // Авторский проект и хамам не тарифицируются за метр — считаем
+    // индивидуально, но точку входа называем сразу.
+    if (!pkg.pricePerM2) {
+      state.byProject = true;
+      state.total = band ? band.min : 0;
+      state.totalMax = 0;
+      return;
+    }
 
     var rate = state.steamType === 'finnish' ? 'finnish' : 'russian';
     var finishPart = state.area * pkg.pricePerM2[rate];
@@ -147,8 +168,20 @@
 
     // Печь входит в отделку во всех пакетах
     var total = finishPart + stovePart;
-    state.total = Math.round(total / 1000) * 1000;
-    state.totalMax = Math.round(total * 1.22 / 1000) * 1000;
+    // Держим цену внутри прайса: не ниже нижней границы и не уже верхней.
+    var low = band ? Math.max(total, band.min) : total;
+    var high = total * 1.22;
+    if (band && band.max) high = Math.max(high, band.max);
+    state.total = Math.round(low / 1000) * 1000;
+    state.totalMax = Math.round(high / 1000) * 1000;
+  }
+
+  // Подпись диапазона пакета: «850 000 – 1 500 000 ₽» или «от 2 500 000 ₽».
+  function bandLabel(pkg) {
+    var band = priceBand(pkg);
+    if (!band) return '';
+    if (!band.max) return ' · от ' + fmt(band.min) + ' ₽, ' + (pkg.priceNote || 'по проекту');
+    return ' · ' + fmt(band.min) + ' – ' + fmt(band.max) + ' ₽ под ключ';
   }
 
   /* ---- Разметка ---------------------------------------------------------- */
@@ -237,10 +270,7 @@
                 '<b>' + esc(p.name) + '</b><i>' + esc(p.wood) + '</i></button>';
             }).join('') +
           '</div>' +
-          '<p class="calc__hint">' + esc(pkg.tagline) +
-            (pkg.pricePerM2
-              ? ' · от ' + fmt(pkg.pricePerM2[state.steamType === 'finnish' ? 'finnish' : 'russian']) + ' ₽/м²'
-              : ' · ' + esc(pkg.priceNote)) + '</p>' +
+          '<p class="calc__hint">' + esc(pkg.tagline) + esc(bandLabel(pkg)) + '</p>' +
         '</div>' +
 
         '<details class="calc__more"' + (state.finishOpts.size ? ' open' : '') + '>' +
@@ -298,7 +328,7 @@
         '</div>' +
         '<p class="calc__result-note">' +
           (state.byProject
-            ? 'Авторский проект и хамам считаются индивидуально: состав работ и материалы каждый раз свои. Инженер посчитает после замера.'
+            ? 'Авторский проект и хамам считаются индивидуально: состав работ и материалы каждый раз свои, верхней границы нет. Инженер посчитает после замера.'
             : 'Диапазон, а не финальная цена: на итог влияют объём парной, выбранная печь и инженерные решения. Точную смету инженер посчитает после замера.') +
         '</p>' +
       '</div>' +
@@ -417,9 +447,7 @@
       var st = P.steamTypes.filter(function (t) { return t.id === state.steamType; })[0];
       var pkg = currentPkg();
       lines.push('Тип парной: ' + (st ? st.label : ''));
-      lines.push('Пакет: ' + pkg.name + (pkg.pricePerM2
-        ? ' (' + fmt(pkg.pricePerM2[state.steamType === 'finnish' ? 'finnish' : 'russian']) + ' ₽/м²)'
-        : ' — цена по проекту'));
+      lines.push('Пакет: ' + pkg.name + bandLabel(pkg).replace(' · ', ' — '));
       if (state.finishOpts.size) {
         lines.push('Допы: ' + P.finishOptions.filter(function (o) { return state.finishOpts.has(o.id); })
           .map(function (o) { return o.name; }).join(', '));
@@ -431,7 +459,9 @@
       lines.push('Обвязка: ' + P.stoveOptions.filter(function (o) { return state.stoveOpts.has(o.id); })
         .map(function (o) { return o.name; }).join(', '));
     }
-    lines.push(state.byProject ? 'Расчёт: по проекту' : 'Расчёт: ' + fmt(state.total) + ' – ' + fmt(state.totalMax) + ' ₽');
+    lines.push(state.byProject
+      ? 'Расчёт: от ' + fmt(state.total) + ' ₽, дальше по проекту'
+      : 'Расчёт: ' + fmt(state.total) + ' – ' + fmt(state.totalMax) + ' ₽');
     return lines.join('\n');
   }
 

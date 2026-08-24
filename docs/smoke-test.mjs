@@ -95,9 +95,11 @@ const pickAfter = d.querySelector('.calc-pick__name')?.textContent;
 const totalAfter = d.querySelector('[data-total]')?.textContent;
 if (area) { area.value = 6; area.dispatchEvent(new window.Event('input', { bubbles: true })); }
 
-// Хамам делается только в авторском исполнении — цена по проекту
+// Хамам делается только в авторском исполнении: точка входа 2 500 000 ₽,
+// верхней границы нет — считается по проекту
 click('[data-steam-id="hammam"]');
-const hammamAuthor = /по проекту/i.test(d.querySelector('[data-total]')?.textContent || '');
+const hammamTotal = d.querySelector('[data-total]')?.textContent || '';
+const hammamAuthor = /^\s*от\s/i.test(hammamTotal) && /2\s*500\s*000/.test(hammamTotal);
 click('[data-steam-id="russian"]');
 click('[data-pkg-id="comfort"]');
 
@@ -135,7 +137,7 @@ const checks = {
   'объём выводится из площади':       volShown,
   'площадь меняет модель печи':       pickBefore !== pickAfter,
   'площадь пересчитывает итог':       total0 !== totalAfter,
-  'хамам считается по проекту':       hammamAuthor,
+  'хамам: от 2 500 000 ₽ по проекту': hammamAuthor,
   'фильтр «электро» сужает выдачу':   stovesAfter > 0 && stovesAfter < stovesBefore,
   'модалка открывается':              modal && !modal.hasAttribute('hidden'),
   'в модалке есть сводка расчёта':    !!modal?.querySelector('.modal__summary-price'),

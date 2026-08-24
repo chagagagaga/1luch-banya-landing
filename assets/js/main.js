@@ -52,11 +52,21 @@
   (function packages() {
     var box = $('[data-packages]');
     if (!box) return;
+    // Диапазон стоимости готовой парной под ключ — прайс, а не ставка за метр.
+    function band(p, type) { return (p.projectPrice || {})[type] || null; }
+    function bandText(b) {
+      if (!b) return '';
+      return b.max ? fmt(b.min) + ' – ' + fmt(b.max) + ' ₽' : 'от ' + fmt(b.min) + ' ₽';
+    }
+
     box.innerHTML = P.packages.map(function (p) {
       // Цена зависит от типа парной: русская баня дороже финской сауны.
-      // У авторского пакета цены нет — он считается индивидуально.
-      var rates = p.pricePerM2;
-      var from = rates ? Math.min(rates.finnish, rates.russian) : 0;
+      // У авторского пакета верхней границы нет — считается по проекту.
+      var fin = band(p, 'finnish');
+      var rus = band(p, 'russian');
+      var ham = band(p, 'hammam');
+      var open = p.pricePerM2 ? null : true;   // авторский: цена «от», дальше по проекту
+      var from = fin ? fin.min : 0;
       return '' +
       '<article class="pkg' + (p.popular ? ' pkg--popular' : '') + '" data-pkg-card="' + p.id + '">' +
         (p.popular ? '<span class="pkg__badge">Выбирают чаще всего</span>' : '') +
@@ -65,13 +75,12 @@
           '<p class="pkg__tagline">' + esc(p.tagline) + '</p>' +
         '</header>' +
         '<div class="pkg__price">' +
-          (rates
-            ? '<b>от ' + fmt(from) + ' ₽</b><span>за м² парной</span>'
-            : '<b>По проекту</b><span>считаем индивидуально</span>') +
+          '<b>от ' + fmt(from) + ' ₽</b>' +
+          '<span>' + (open ? 'дальше по проекту' : 'за парную под ключ') + '</span>' +
         '</div>' +
-        (rates
-          ? '<p class="pkg__example">Финская сауна от ' + fmt(rates.finnish) + ' ₽/м², русская баня от ' + fmt(rates.russian) + ' ₽/м²</p>'
-          : '<p class="pkg__example">Состав работ и материалы каждый раз свои — цену называем после замера</p>') +
+        '<p class="pkg__example">Финская сауна ' + bandText(fin) + ', русская парная ' + bandText(rus) +
+          (ham ? ', хамам ' + bandText(ham) : '') +
+          (open ? '. Верхнюю границу называем после замера' : '') + '</p>' +
         '<p class="pkg__wood"><span>Материал</span>' + esc(p.wood) + '</p>' +
         '<ul class="pkg__list">' +
           p.includes.map(function (i) { return '<li>' + esc(i) + '</li>'; }).join('') +
@@ -79,7 +88,7 @@
         (p.notIncluded && p.notIncluded.length
           ? '<p class="pkg__not">Не входит: ' + p.notIncluded.map(esc).join(', ') + '</p>' : '') +
         '<button type="button" class="btn ' + (p.popular ? 'btn--primary' : 'btn--ghost') + ' btn--block" ' +
-          'data-open-pkg="' + p.id + '">' + (rates ? 'Рассчитать в этом пакете' : 'Обсудить проект') + '</button>' +
+          'data-open-pkg="' + p.id + '">' + (open ? 'Обсудить проект' : 'Рассчитать в этом пакете') + '</button>' +
       '</article>';
     }).join('');
 
