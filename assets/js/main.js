@@ -41,6 +41,17 @@
       if (lead) lead.innerHTML = 'Если вопроса нет в списке — позвоните, ответим сразу. '
         + '<span class="nb">' + esc(c.worktime) + '.</span>';
     }
+    // В мобильной панели один слот под мессенджер: MAX в приоритете,
+    // WhatsApp — запасной. Обе сразу не помещаются рядом с телефоном
+    // и кнопкой расчёта.
+    (function barMessenger() {
+      var max = document.querySelector('.mobilebar [data-max-link]');
+      var wa = document.querySelector('.mobilebar [data-wa-link]');
+      if (!max || !wa) return;
+      if (c.maxUrl) { max.hidden = false; wa.hidden = true; }
+      else { max.hidden = true; wa.hidden = !c.whatsapp; }
+    })();
+
     $$('[data-phone-link]').forEach(function (a) {
       a.href = c.phoneHref;
       if (a.textContent.trim().indexOf('+7') === 0) a.textContent = c.phone;
@@ -454,6 +465,13 @@
     ].forEach(function (sel) { $$(sel).forEach(walk); });
   })();
 
+  /* Отступ под липкую шапку задан в CSS через scroll-margin-top —
+     ручной расчёт спорил с нативной плавной прокруткой браузера. */
+  function scrollToEl(el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  window.LuchScrollTo = scrollToEl;
+
   /* ═══ Шапка, меню, плавный скролл ══════════════════════════════════════ */
   (function chrome() {
     var header = $('[data-header]');
@@ -493,7 +511,7 @@
       var t = document.querySelector(id);
       if (!t) return;
       e.preventDefault();
-      t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      scrollToEl(t);
       history.replaceState(null, '', id);
     });
   })();

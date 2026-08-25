@@ -653,7 +653,11 @@
       if (mode === 'both' || mode === 'finish') mode = 'full';
       if (mode && MODES.some(function (m) { return m.id === mode; })) { state.mode = mode; render(); }
       var el = document.getElementById('calc');
-      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (!el) return;
+      // Прокрутка учитывает липкую шапку — иначе верх конфигуратора
+      // уезжает под неё и человек видит его середину.
+      if (window.LuchScrollTo) window.LuchScrollTo(el);
+      else el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     },
     openModal: function (source) {
       if (!modal) modal = buildModal();
