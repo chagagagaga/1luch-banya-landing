@@ -4,10 +4,12 @@
   "private": true,
   "description": "Лендинг «Первый Луч»: отделка парной под ключ и банные печи. Холодный трафик Яндекс.Директа.",
   "scripts": {
-    "test": "node docs/smoke-test.mjs",
-    "start": "python3 -m http.server 8080"
+    "test": "node docs/smoke-test.mjs && node docs/audit.mjs",
+    "visual": "node docs/visual.mjs",
+    "start": "python3 -m http.server 8099"
   },
   "devDependencies": {
-    "jsdom": "^25.0.0"
+    "jsdom": "^25.0.0",
+    "playwright": "^1.62.1"
   }
 }

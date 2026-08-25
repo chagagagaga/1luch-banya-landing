@@ -124,6 +124,14 @@ input, textarea, select, button { font-family: inherit; font-size: inherit; }
    не прыгала. Первый экран и следующий за ним блок из этого исключены. */
 main > section:nth-of-type(n+4) { content-visibility: auto; contain-intrinsic-size: auto 800px; }
 
+/* Пальцем в ссылку высотой 20 px не попасть. Расширяем зону нажатия,
+   не трогая вид: вертикальные отступы у ссылок навигации, подвала
+   и контактов. */
+.nav a, .footer__nav a, .contacts__list a, .footer__phone,
+.header__phone a { display: inline-block; padding-block: .55rem; }
+.footer__nav { gap: 0; }
+.logo { padding-block: .5rem; }
+
 /* Заголовок не должен ронять последнее слово на отдельную строку, абзац —
    заканчиваться одиноким предлогом. Браузеры без text-wrap просто игнорируют. */
 h1, h2, h3, .section__title, .hero__title, .pkg__name, .step__body h3, .gcard h3 { text-wrap: balance; }
@@ -586,11 +594,14 @@ textarea.input { resize: vertical; min-height: 88px; }
    ═════════════════════════════════════════════════════════════════════════ */
 .pricewhy { background: var(--paper-2); }
 .pricewhy__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(272px, 1fr)); gap: var(--gap); }
-.pw { position: relative; overflow: hidden; padding: clamp(1.3rem, 1rem + 1vw, 1.85rem); border-radius: var(--r-lg); background: #fff; border: 1px solid var(--line); }
+.pw { position: relative; overflow: hidden; border-radius: var(--r-lg); background: #fff; border: 1px solid var(--line); }
+.pw > :not(.pw__img) { margin-inline: clamp(1.3rem, 1rem + 1vw, 1.85rem); }
+.pw > :nth-last-child(1) { margin-bottom: clamp(1.3rem, 1rem + 1vw, 1.85rem); }
 /* Картинка вместо стены текста — правка Дениса: «лучше визуально показывать» */
-.pw__img { display: block; width: calc(100% + 2 * clamp(1.3rem, 1rem + 1vw, 1.85rem)); margin: calc(-1 * clamp(1.3rem, 1rem + 1vw, 1.85rem)) calc(-1 * clamp(1.3rem, 1rem + 1vw, 1.85rem)) 1.1rem; aspect-ratio: 4 / 3; object-fit: cover; }
+.pw__img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; margin-bottom: 1.1rem; }
+.pw__n { display: block; }
 .pw__n { font-family: var(--font-display); font-size: .8rem; font-weight: 700; letter-spacing: .1em; color: var(--stone); }
-.pw h3 { margin-top: .5rem; font-size: 1.1rem; }
+.pw h3 { margin-top: .4rem; font-size: 1.1rem; }
 .pw p { margin-top: .6rem; font-size: var(--fs-sm); color: var(--text-soft); line-height: 1.55; }
 .pw__scale { margin-top: .9rem !important; padding-top: .8rem; border-top: 1px solid var(--line); font-size: var(--fs-xs) !important; }
 .pw__scale b { color: var(--text); font-weight: 700; }
@@ -608,8 +619,8 @@ textarea.input { resize: vertical; min-height: 88px; }
 
 /* ── Доказательства к гарантиям: договор и 3D-проект ────────────────────── */
 .proofpair { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--gap); margin-top: var(--gap); }
-.proofpair figure { margin: 0; display: flex; flex-direction: column; gap: .85rem; }
-.proofpair img, .proofpair__stub { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; border-radius: var(--r-lg); border: 1px solid var(--line); }
+.proofpair figure { margin: 0; display: grid; grid-template-rows: 1fr auto; gap: .85rem; }
+.proofpair img, .proofpair__stub { width: 100%; height: 100%; min-height: min(62vw, 420px); object-fit: cover; border-radius: var(--r-lg); border: 1px solid var(--line); }
 .proofpair figcaption { display: flex; flex-direction: column; gap: .2rem; font-size: var(--fs-sm); color: var(--text-soft); line-height: 1.5; }
 .proofpair figcaption b { font-size: 1rem; color: var(--text); }
 
@@ -618,20 +629,21 @@ textarea.input { resize: vertical; min-height: 88px; }
    масштабируется и ничего не весит. Подписей и печатей намеренно нет —
    это бланк условий, а не скан подписанного документа. */
 .doc {
-  display: flex; flex-direction: column; gap: 1rem; aspect-ratio: 16 / 10;
+  display: flex; flex-direction: column; gap: 1rem; min-height: min(62vw, 420px);
   padding: clamp(1.1rem, .8rem + 1.2vw, 1.9rem); border-radius: var(--r-lg);
-  background: #fff; border: 1px solid var(--line); box-shadow: var(--sh-sm); overflow: hidden;
+  background: #fff; border: 1px solid var(--line); box-shadow: var(--sh-sm);
 }
 .doc__head { display: flex; flex-direction: column; gap: .25rem; padding-bottom: .9rem; border-bottom: 2px solid var(--ink); }
 .doc__kicker { align-self: flex-start; padding: .15em .6em; border-radius: 2px; background: var(--paper-3); font-size: .6rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--stone); }
 .doc__head b { font-family: var(--font-display); font-size: clamp(.95rem, .8rem + .5vw, 1.15rem); }
 .doc__meta { font-size: var(--fs-xs); color: var(--text-soft); }
-.doc__list { display: grid; gap: .55rem; margin: 0; padding: 0; list-style: none; flex: 1; min-height: 0; }
-.doc__list li { display: grid; grid-template-columns: 2.4rem 1fr; gap: .5rem; font-size: clamp(.66rem, .58rem + .3vw, .78rem); line-height: 1.45; color: var(--text-soft); }
+.doc__list { display: grid; gap: .6rem; margin: 0; padding: 0; list-style: none; flex: 1; }
+.doc__list li { position: relative; padding-left: 2.6rem; font-size: clamp(.66rem, .58rem + .3vw, .78rem); line-height: 1.5; color: var(--text-soft); }
+.doc__list li b:first-child { position: absolute; left: 0; top: 0; }
 .doc__list b { font-weight: 700; color: var(--text); }
 .doc__list u { text-decoration: none; font-weight: 700; color: var(--text); background: linear-gradient(transparent 62%, var(--paper-3) 62%); }
 .doc__foot { display: flex; justify-content: space-between; gap: 2rem; padding-top: .8rem; border-top: 1px solid var(--line); font-size: var(--fs-xs); color: var(--text-soft); }
-.doc__foot span { flex: 1; border-bottom: 1px solid var(--line); padding-bottom: 1.4rem; }
+.doc__foot span { flex: 1; border-bottom: 1px solid var(--line); padding-bottom: 1.2rem; }
 
 /* Заглушки под фото, которых пока нет. Намеренно выглядят как заглушки —
    чтобы никто не принял их за готовый блок и не забыл заменить. */
