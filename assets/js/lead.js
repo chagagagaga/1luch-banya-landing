@@ -140,7 +140,7 @@
       .catch(function () {
         form.dataset.sending = '';
         if (btn) { btn.disabled = false; btn.textContent = btnText; }
-        setStatus(form, 'Не удалось отправить. Позвоните: +7 (495) 141-18-88', 'error');
+        setStatus(form, 'Не удалось отправить. Позвоните: +7 (916) 316-00-89', 'error');
       });
   }
 

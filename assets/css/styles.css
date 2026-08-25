@@ -582,6 +582,24 @@ textarea.input { resize: vertical; min-height: 88px; }
 .pricewhy__base li::before { content: '✓'; position: absolute; left: 0; color: var(--amber); font-weight: 700; }
 .pricewhy__base .btn { justify-self: start; }
 
+/* ── Доказательства к гарантиям: договор и 3D-проект ────────────────────── */
+.proofpair { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--gap); margin-top: var(--gap); }
+.proofpair figure { margin: 0; display: flex; flex-direction: column; gap: .85rem; }
+.proofpair img, .proofpair__stub { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; border-radius: var(--r-lg); border: 1px solid var(--line); }
+.proofpair figcaption { display: flex; flex-direction: column; gap: .2rem; font-size: var(--fs-sm); color: var(--text-soft); line-height: 1.5; }
+.proofpair figcaption b { font-size: 1rem; color: var(--text); }
+
+/* Заглушки под фото, которых пока нет. Намеренно выглядят как заглушки —
+   чтобы никто не принял их за готовый блок и не забыл заменить. */
+.proofpair__stub, .showroom__stub {
+  display: grid; place-content: center; gap: .3rem; text-align: center;
+  background: repeating-linear-gradient(135deg, var(--paper-2) 0 12px, var(--paper-3) 12px 24px);
+  border: 2px dashed var(--stone); border-radius: var(--r-lg); color: var(--stone); padding: 1.5rem;
+}
+.proofpair__stub span, .showroom__stub span { font-weight: 700; font-size: 1rem; }
+.proofpair__stub i, .showroom__stub i { font-style: normal; font-size: var(--fs-xs); }
+.showroom__stub { margin-top: 1.25rem; aspect-ratio: 16 / 9; }
+
 /* ── Оффер в блоке с формой ──────────────────────────────────────────────── */
 .offer__list { display: grid; gap: .9rem; margin-top: 1.25rem; }
 .offer__list li { display: flex; flex-direction: column; gap: .15rem; padding-left: 1.5rem; position: relative; }
