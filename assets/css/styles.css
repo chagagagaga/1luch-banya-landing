@@ -608,6 +608,12 @@ textarea.input { resize: vertical; min-height: 88px; }
 .proofpair__stub i, .showroom__stub i { font-style: normal; font-size: var(--fs-xs); }
 .showroom__stub { margin-top: 1.25rem; aspect-ratio: 16 / 9; }
 
+/* Шоурум: реальные снимки павильона. Первый кадр крупнее — по нему
+   человека узнаёт место, когда доедет. */
+.showroom { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; margin-top: 1.35rem; }
+.showroom img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: var(--r); }
+.showroom img:first-child { grid-column: 1 / -1; aspect-ratio: 16 / 9; }
+
 /* ── Оффер в блоке с формой ──────────────────────────────────────────────── */
 .offer__list { display: grid; gap: .9rem; margin-top: 1.25rem; }
 .offer__list li { display: flex; flex-direction: column; gap: .15rem; padding-left: 1.5rem; position: relative; }
