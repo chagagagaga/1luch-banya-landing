@@ -292,7 +292,7 @@
 
       (state.stove ? (
         '<div class="calc-pick" data-pick>' +
-          '<div class="calc-pick__img">' + (state.stove.img ? '<img src="' + esc(state.stove.img) + '" alt="' + esc(state.stove.name) + '" loading="lazy">' : '') + '</div>' +
+          '<div class="calc-pick__img">' + (state.stove.img ? '<img src="' + esc(state.stove.img) + '" alt="' + esc(state.stove.name) + '" loading="lazy" decoding="async" width="560" height="560">' : '') + '</div>' +
           '<div class="calc-pick__body">' +
             '<span class="calc-pick__label">Подходит вашей парной</span>' +
             '<b class="calc-pick__name">' + esc(state.stove.name) + '</b>' +
@@ -544,7 +544,6 @@
         '<button type="button" class="modal__close" data-close aria-label="Закрыть">✕</button>' +
         '<h3 class="modal__title" id="modal-title" data-modal-title></h3>' +
         '<p class="modal__sub" data-modal-sub></p>' +
-        '<div class="modal__summary" data-modal-summary></div>' +
         '<div class="modal__channels" data-channels>' +
           '<button type="button" class="modal__chan" data-chan="whatsapp"><b>WhatsApp</b></button>' +
           '<button type="button" class="modal__chan" data-chan="telegram"><b>Telegram</b></button>' +

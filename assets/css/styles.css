@@ -119,6 +119,11 @@ input, textarea, select, button { font-family: inherit; font-size: inherit; }
 
 .container { width: 100%; max-width: var(--container); margin-inline: auto; padding-inline: var(--pad-x); }
 
+/* Скорость: секции ниже первого экрана браузер не рисует, пока до них не
+   дошли. contain-intrinsic-size держит высоту скроллбара, чтобы полоса
+   не прыгала. Первый экран и следующий за ним блок из этого исключены. */
+main > section:nth-of-type(n+4) { content-visibility: auto; contain-intrinsic-size: auto 800px; }
+
 /* Заголовок не должен ронять последнее слово на отдельную строку, абзац —
    заканчиваться одиноким предлогом. Браузеры без text-wrap просто игнорируют. */
 h1, h2, h3, .section__title, .hero__title, .pkg__name, .step__body h3, .gcard h3 { text-wrap: balance; }
@@ -288,7 +293,7 @@ textarea.input { resize: vertical; min-height: 88px; }
 .hero__proof { display: flex; align-items: center; gap: .9rem; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid rgba(255, 255, 255, .13); }
 /* Лицо человека в первом экране — просьба Дениса: доверие возникает
    раньше, чем человек начинает читать аргументы. */
-.hero__proof-photo { width: 62px; height: 62px; flex: none; border-radius: 50%; object-fit: cover; border: 2px solid rgba(246, 242, 234, .25); }
+.hero__proof-photo { width: 84px; height: 84px; flex: none; border-radius: 50%; object-fit: cover; border: 2px solid rgba(246, 242, 234, .25); }
 .hero__proof-avatars { display: flex; flex: none; }
 .hero__proof-avatars img { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(20, 16, 12, .9); margin-left: -12px; }
 .hero__proof-avatars img:first-child { margin-left: 0; }
@@ -541,10 +546,11 @@ textarea.input { resize: vertical; min-height: 88px; }
 .stove__specs { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--line); }
 .stove__specs span { display: flex; flex-direction: column; font-size: var(--fs-xs); color: var(--text-soft); }
 .stove__specs b { font-size: .92rem; color: var(--text); }
-.stove__foot { display: flex; align-items: center; justify-content: space-between; gap: .75rem; padding: 1.15rem 1.25rem; }
-.stove__price { display: flex; flex-direction: column; }
+.stove__foot { display: grid; gap: .75rem; padding: 1.15rem 1.25rem; }
+.stove__foot .btn { width: 100%; }
+.stove__price { display: flex; align-items: baseline; gap: .5rem; }
 .stove__price span { font-size: var(--fs-xs); color: var(--text-soft); }
-.stove__price b { font-family: var(--font-display); font-size: 1.15rem; font-weight: 700; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.stove__price b { font-family: var(--font-display); font-size: 1.15rem; font-weight: 700; letter-spacing: -.02em; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .stoves__more { display: flex; justify-content: center; margin-top: 1.5rem; }
 .stoves__empty { margin-top: 1.5rem; text-align: center; color: var(--text-soft); }
 .stoves__empty a { color: var(--fire); text-decoration: underline; }
@@ -568,7 +574,8 @@ textarea.input { resize: vertical; min-height: 88px; }
 }
 .why__bundle li { display: flex; gap: .5rem; align-items: baseline; font-size: var(--fs-sm); color: var(--text-soft); }
 .why__bundle b { flex: none; color: var(--ink); font-weight: 700; }
-.why__cta { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: .75rem 1.25rem; margin-top: var(--gap); }
+.why__cta { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: .75rem 1.25rem; margin-top: var(--gap); text-align: center; }
+.why__cta span { flex: 1 1 100%; }
 .why__cta span { font-size: var(--fs-sm); color: var(--text-soft); }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -579,7 +586,9 @@ textarea.input { resize: vertical; min-height: 88px; }
    ═════════════════════════════════════════════════════════════════════════ */
 .pricewhy { background: var(--paper-2); }
 .pricewhy__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(272px, 1fr)); gap: var(--gap); }
-.pw { position: relative; padding: clamp(1.3rem, 1rem + 1vw, 1.85rem); border-radius: var(--r-lg); background: #fff; border: 1px solid var(--line); }
+.pw { position: relative; overflow: hidden; padding: clamp(1.3rem, 1rem + 1vw, 1.85rem); border-radius: var(--r-lg); background: #fff; border: 1px solid var(--line); }
+/* Картинка вместо стены текста — правка Дениса: «лучше визуально показывать» */
+.pw__img { display: block; width: calc(100% + 2 * clamp(1.3rem, 1rem + 1vw, 1.85rem)); margin: calc(-1 * clamp(1.3rem, 1rem + 1vw, 1.85rem)) calc(-1 * clamp(1.3rem, 1rem + 1vw, 1.85rem)) 1.1rem; aspect-ratio: 4 / 3; object-fit: cover; }
 .pw__n { font-family: var(--font-display); font-size: .8rem; font-weight: 700; letter-spacing: .1em; color: var(--stone); }
 .pw h3 { margin-top: .5rem; font-size: 1.1rem; }
 .pw p { margin-top: .6rem; font-size: var(--fs-sm); color: var(--text-soft); line-height: 1.55; }
@@ -603,6 +612,26 @@ textarea.input { resize: vertical; min-height: 88px; }
 .proofpair img, .proofpair__stub { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; border-radius: var(--r-lg); border: 1px solid var(--line); }
 .proofpair figcaption { display: flex; flex-direction: column; gap: .2rem; font-size: var(--fs-sm); color: var(--text-soft); line-height: 1.5; }
 .proofpair figcaption b { font-size: 1rem; color: var(--text); }
+
+/* Образец договора: реальный текст условий вместо иконки — правка Дениса
+   «покажи договор». Вёрстка, а не картинка: текст читается на любом экране,
+   масштабируется и ничего не весит. Подписей и печатей намеренно нет —
+   это бланк условий, а не скан подписанного документа. */
+.doc {
+  display: flex; flex-direction: column; gap: 1rem; aspect-ratio: 16 / 10;
+  padding: clamp(1.1rem, .8rem + 1.2vw, 1.9rem); border-radius: var(--r-lg);
+  background: #fff; border: 1px solid var(--line); box-shadow: var(--sh-sm); overflow: hidden;
+}
+.doc__head { display: flex; flex-direction: column; gap: .25rem; padding-bottom: .9rem; border-bottom: 2px solid var(--ink); }
+.doc__kicker { align-self: flex-start; padding: .15em .6em; border-radius: 2px; background: var(--paper-3); font-size: .6rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--stone); }
+.doc__head b { font-family: var(--font-display); font-size: clamp(.95rem, .8rem + .5vw, 1.15rem); }
+.doc__meta { font-size: var(--fs-xs); color: var(--text-soft); }
+.doc__list { display: grid; gap: .55rem; margin: 0; padding: 0; list-style: none; flex: 1; min-height: 0; }
+.doc__list li { display: grid; grid-template-columns: 2.4rem 1fr; gap: .5rem; font-size: clamp(.66rem, .58rem + .3vw, .78rem); line-height: 1.45; color: var(--text-soft); }
+.doc__list b { font-weight: 700; color: var(--text); }
+.doc__list u { text-decoration: none; font-weight: 700; color: var(--text); background: linear-gradient(transparent 62%, var(--paper-3) 62%); }
+.doc__foot { display: flex; justify-content: space-between; gap: 2rem; padding-top: .8rem; border-top: 1px solid var(--line); font-size: var(--fs-xs); color: var(--text-soft); }
+.doc__foot span { flex: 1; border-bottom: 1px solid var(--line); padding-bottom: 1.4rem; }
 
 /* Заглушки под фото, которых пока нет. Намеренно выглядят как заглушки —
    чтобы никто не принял их за готовый блок и не забыл заменить. */
@@ -675,10 +704,13 @@ textarea.input { resize: vertical; min-height: 88px; }
 .lightbox__frame img { max-height: 76vh; width: auto; margin-inline: auto; border-radius: var(--r); object-fit: contain; }
 .lightbox__frame figcaption { text-align: center; color: rgba(255, 255, 255, .78); font-size: var(--fs-sm); }
 .lightbox__close { position: absolute; top: 1rem; right: 1rem; width: 44px; height: 44px; border: 0; border-radius: 50%; background: rgba(255, 255, 255, .12); color: #fff; font-size: 1.1rem; }
-.lightbox__nav { position: absolute; top: 50%; transform: translateY(-50%); width: 52px; height: 52px; border: 0; border-radius: 50%; background: rgba(255, 255, 255, .12); color: #fff; font-size: 2rem; line-height: 1; display: grid; place-items: center; }
+/* Стрелки держим у краёв самого кадра и по центру картинки, иначе на
+   телефоне они уезжают на подпись и перекрывают текст. */
+.lightbox__frame { position: relative; }
+.lightbox__nav { position: absolute; top: 38%; transform: translateY(-50%); width: 48px; height: 48px; border: 0; border-radius: 50%; background: rgba(12, 9, 6, .55); backdrop-filter: blur(6px); color: #fff; font-size: 1.6rem; line-height: 1; display: grid; place-items: center; z-index: 2; }
 .lightbox__nav:hover { background: rgba(255, 255, 255, .22); }
-.lightbox__nav--prev { left: clamp(.5rem, 2vw, 2rem); }
-.lightbox__nav--next { right: clamp(.5rem, 2vw, 2rem); }
+.lightbox__nav--prev { left: .5rem; }
+.lightbox__nav--next { right: .5rem; }
 .lightbox__cta { position: absolute; left: 50%; bottom: 1.25rem; transform: translateX(-50%); }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -912,7 +944,10 @@ textarea.input { resize: vertical; min-height: 88px; }
   .header__right .btn { padding: .65em .85em; }
   .nav { inset: 62px 0 auto; }
 
-  .hero__proof { flex-direction: column; align-items: flex-start; }
+  /* Портрет и текст рядом: столбиком они съедали пол-экрана */
+  .hero__proof { flex-direction: row; align-items: center; gap: .85rem; }
+  .hero__proof-photo { width: 92px; height: 92px; }
+  .hero__proof p { font-size: var(--fs-xs); line-height: 1.4; }
   .calc__field--row { grid-template-columns: minmax(0, 1fr); }
   .calc-modes { grid-template-columns: minmax(0, 1fr); }
   .calc-mode { flex-direction: row; align-items: baseline; gap: .5rem; }
@@ -969,12 +1004,11 @@ textarea.input { resize: vertical; min-height: 88px; }
   }
   .stoves__filters .chip { padding: .55em .4em; text-align: center; font-size: .8rem; }
 
-  /* Галерея цеха на всю ширину блока */
-  .production__gallery { gap: .5rem; }
+  /* Галерея цеха: на телефоне в один столбец — мелкие плитки не читались */
+  .production__gallery { grid-template-columns: minmax(0, 1fr); gap: 1.1rem; }
 }
 
 @media (max-width: 420px) {
-  .hero__usp { grid-template-columns: minmax(0, 1fr); }
   .modal__channels { grid-template-columns: minmax(0, 1fr); }
   /* Совсем узкий экран: чипов по два, иначе текст в них не помещается */
   .stoves__filters .chips { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -1136,8 +1170,9 @@ textarea.input { resize: vertical; min-height: 88px; }
   .hero__sub { font-size: 1rem; max-width: none; }
   .calc { padding: 1rem; }
 
-  /* Вилка цены остаётся на виду, пока человек листает конфигуратор */
-  .calc__result { position: sticky; bottom: calc(76px + env(safe-area-inset-bottom)); z-index: 3; box-shadow: 0 -8px 24px rgba(16, 14, 11, .35); }
+  /* Раньше вилка цены была липкой и перекрывала поля конфигуратора —
+     теперь едет вместе с содержимым. */
+  .calc__result { margin-block: 1rem; }
 
   .trustbar__nums { grid-template-columns: 1fr 1fr; }
   .trustbar__proof { align-items: flex-start; }
@@ -1159,23 +1194,11 @@ textarea.input { resize: vertical; min-height: 88px; }
    заголовок, подзаголовок, начало конфигуратора, вилка цены и CTA.
    ═════════════════════════════════════════════════════════════════════════ */
 @media (min-width: 721px) {
-  .calc {
-    display: flex; flex-direction: column;
-    max-height: calc(100vh - 7.5rem);
-    overflow-y: auto; overscroll-behavior: contain;
-    padding-bottom: .5rem;
-  }
-  .calc__field { margin-bottom: .7rem; }
-  .calc__label--cta { display: none; }
-  .calc__result {
-    position: sticky; bottom: 5.4rem; z-index: 2;
-    margin-top: auto; margin-bottom: .55rem;
-  }
-  .calc__cta {
-    position: sticky; bottom: 0; z-index: 2;
-    background: var(--paper); padding-block: .35rem .3rem;
-  }
-  .calc__social { padding-top: .15rem; }
+  .calc { display: flex; flex-direction: column; }
+  .calc__field { margin-bottom: .8rem; }
+  .calc__result { margin-top: auto; margin-bottom: .9rem; }
+  .calc__cta { padding-block: .35rem .3rem; }
+  .calc__social { padding-top: .35rem; }
 }
 
 /* Мобильные табы сценария — в одну строку, как в концепте */

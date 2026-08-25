@@ -125,7 +125,7 @@
       return '' +
       '<article class="stove" data-stove="' + esc(s.id) + '">' +
         '<div class="stove__media">' +
-          (s.img ? '<img src="' + esc(s.img) + '" alt="' + esc(s.name) + '" loading="lazy" width="400" height="400">' : '') +
+          (s.img ? '<img src="' + esc(s.img) + '" alt="' + esc(s.name) + '" loading="lazy" decoding="async" width="400" height="400">' : '') +
           '<span class="stove__tier stove__tier--' + s.tier + '">' + TIER_LABEL[s.tier] + '</span>' +
         '</div>' +
         '<div class="stove__body">' +
@@ -198,9 +198,11 @@
     var VISIBLE = 6;
 
     function photos(w) {
-      var out = [];
-      for (var i = 1; i <= w.photos; i++) out.push('assets/img/works/' + w.id + '-' + i + '.webp');
-      return out;
+      // pics задаёт, какие именно кадры показывать: часть файлов объекта
+      // в галерею не идёт — экстерьеры, санузлы, пустые стены.
+      var nums = w.pics;
+      if (!nums) { nums = []; for (var i = 1; i <= w.photos; i++) nums.push(i); }
+      return nums.map(function (n) { return 'assets/img/works/' + w.id + '-' + n + '.webp'; });
     }
 
     box.innerHTML = P.works.map(function (w, idx) {
@@ -208,7 +210,7 @@
       return '' +
       '<article class="work' + (idx >= VISIBLE ? ' is-hidden' : '') + '" data-work="' + esc(w.id) + '">' +
         '<button type="button" class="work__btn" data-open-work="' + idx + '" aria-label="Открыть галерею: ' + esc(w.title) + '">' +
-          '<img src="' + esc(ph[0]) + '" alt="' + esc(w.title) + ', ' + esc(w.place) + '" loading="lazy" width="600" height="450">' +
+          '<img src="' + esc(ph[0]) + '" alt="' + esc(w.title) + ', ' + esc(w.place) + '" loading="lazy" decoding="async" width="600" height="450">' +
           '<span class="work__count">' + ph.length + ' фото</span>' +
         '</button>' +
         '<div class="work__meta">' +
@@ -306,7 +308,7 @@
       return '' +
       '<article class="video" data-video="' + esc(v.id) + '">' +
         '<button type="button" class="video__btn" aria-label="Смотреть: ' + esc(v.title) + '">' +
-          '<img src="assets/img/ui/' + esc(v.img) + '.webp" alt="' + esc(v.title) + '" loading="lazy" width="480" height="270">' +
+          '<img src="assets/img/ui/' + esc(v.img) + '.webp" alt="' + esc(v.title) + '" loading="lazy" decoding="async" width="480" height="270">' +
           '<span class="video__play" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>' +
         '</button>' +
         '<p class="video__title">' + esc(v.title) + '</p>' +
@@ -318,13 +320,13 @@
       if (!b) return;
       var art = b.closest('[data-video]');
       var id = art.dataset.video;
-      var frame = document.createElement('div');
-      frame.className = 'video__frame';
-      frame.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + encodeURIComponent(id) +
-        '?autoplay=1&rel=0" title="Видео объекта" allow="accelerometer; autoplay; encrypted-media; picture-in-picture" allowfullscreen loading="lazy"></iframe>';
-      b.replaceWith(frame);
       var mid = (P.company && P.company.yandexMetrikaId) || 0;
       if (mid && typeof window.ym === 'function') { try { window.ym(mid, 'reachGoal', 'video_play', { id: id }); } catch (err) {} }
+
+      // Встроенный плеер YouTube в России не проигрывается — окно оставалось
+      // чёрным. Пока ролики не перезальют на VK Видео или Rutube, открываем
+      // в новой вкладке: клик работает, а не «ничего не происходит».
+      window.open('https://www.youtube.com/watch?v=' + encodeURIComponent(id), '_blank', 'noopener');
     });
   })();
 
@@ -337,7 +339,7 @@
       '<figure class="review">' +
         '<blockquote>' + esc(r.text) + '</blockquote>' +
         '<figcaption>' +
-          '<img src="' + esc(r.photo) + '" alt="" loading="lazy" width="48" height="48">' +
+          '<img src="' + esc(r.photo) + '" alt="" loading="lazy" decoding="async" width="48" height="48">' +
           '<span><b>' + esc(r.name) + '</b><i>' + esc(r.place) + '</i></span>' +
         '</figcaption>' +
       '</figure>';

@@ -145,7 +145,7 @@ const checks = {
   'хамам: от 2 500 000 ₽ по проекту': hammamAuthor,
   'фильтр «электро» сужает выдачу':   stovesAfter > 0 && stovesAfter < stovesBefore,
   'модалка открывается':              modal && !modal.hasAttribute('hidden'),
-  'в модалке есть сводка расчёта':    !!modal?.querySelector('.modal__summary-price'),
+  'в модалке только форма, без сводки': !!modal && !modal.querySelector('.modal__summary'),
   'лайтбокс открывается с фото':      lb && !lb.hasAttribute('hidden') && !!lb.querySelector('img')?.src,
   'маска телефона работает':          masked,
   'валидация ловит пустое имя':       validates,
