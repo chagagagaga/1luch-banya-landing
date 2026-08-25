@@ -537,8 +537,8 @@ textarea.input { resize: vertical; min-height: 88px; }
 .stoves__grid > * { flex: 0 1 calc((100% - var(--gap) * 2) / 3); min-width: 280px; }
 .stove { display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: var(--r-lg); background: #fff; overflow: hidden; transition: transform var(--t), box-shadow var(--t); }
 .stove:hover { transform: translateY(-4px); box-shadow: var(--sh); }
-.stove__media { position: relative; aspect-ratio: 1 / 1; display: grid; place-items: center; padding: 1.25rem; background: var(--paper-3); }
-.stove__media img { max-height: 100%; width: auto; object-fit: contain; mix-blend-mode: multiply; }
+.stove__media { position: relative; aspect-ratio: 1 / 1; display: grid; place-items: center; padding: .5rem; background: var(--paper-3); }
+.stove__media img { max-height: 100%; max-width: 100%; width: auto; object-fit: contain; mix-blend-mode: multiply; }
 .stove__tier {
   position: absolute; top: .8rem; left: .8rem; padding: .25em .7em; border-radius: 2px;
   font-size: var(--fs-xs); font-weight: 700; background: #fff; color: var(--text-soft); box-shadow: var(--sh-sm);
@@ -601,6 +601,10 @@ textarea.input { resize: vertical; min-height: 88px; }
 .pw__img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; margin-bottom: 1.1rem; }
 .pw__n { display: block; }
 .pw__n { font-family: var(--font-display); font-size: .8rem; font-weight: 700; letter-spacing: .1em; color: var(--stone); }
+/* Подпись к фото пород: кело читается как испорченная доска, если не знать,
+   что это за материал. Объясняем прямо под кадром. */
+.pw__cap { margin-top: -.4rem !important; margin-bottom: .9rem; padding-bottom: .9rem; border-bottom: 1px solid var(--line); font-size: var(--fs-xs) !important; line-height: 1.5; }
+.pw__cap b { color: var(--text); font-weight: 700; }
 .pw h3 { margin-top: .4rem; font-size: 1.1rem; }
 .pw p { margin-top: .6rem; font-size: var(--fs-sm); color: var(--text-soft); line-height: 1.55; }
 .pw__scale { margin-top: .9rem !important; padding-top: .8rem; border-top: 1px solid var(--line); font-size: var(--fs-xs) !important; }
@@ -619,8 +623,10 @@ textarea.input { resize: vertical; min-height: 88px; }
 
 /* ── Доказательства к гарантиям: договор и 3D-проект ────────────────────── */
 .proofpair { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--gap); margin-top: var(--gap); }
-.proofpair figure { margin: 0; display: grid; grid-template-rows: 1fr auto; gap: .85rem; }
-.proofpair img, .proofpair__stub { width: 100%; height: 100%; min-height: min(62vw, 420px); object-fit: cover; border-radius: var(--r-lg); border: 1px solid var(--line); }
+.proofpair figure { margin: 0; display: flex; flex-direction: column; gap: .85rem; }
+.proofpair figure > :first-child { flex: 1; min-height: min(62vw, 420px); }
+.proofpair img { width: 100%; height: 100%; object-fit: cover; border-radius: var(--r-lg); border: 1px solid var(--line); }
+.proofpair figcaption { flex: none; }
 .proofpair figcaption { display: flex; flex-direction: column; gap: .2rem; font-size: var(--fs-sm); color: var(--text-soft); line-height: 1.5; }
 .proofpair figcaption b { font-size: 1rem; color: var(--text); }
 
