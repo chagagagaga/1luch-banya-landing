@@ -121,6 +121,7 @@
     <p class="brands__label">Официальный партнёр производителей оборудования</p>
     <div class="brands__row">
       <span class="brands__word">EASYSTEAM</span>
+      <span class="brands__word">SPARTHERM</span>
       <img src="assets/img/brands/harvia.webp"   alt="Harvia"   loading="lazy" width="120" height="40">
       <img src="assets/img/brands/tylo.webp"     alt="Tylö"     loading="lazy" width="120" height="40">
       <img src="assets/img/brands/eos.webp"      alt="EOS"      loading="lazy" width="120" height="40">
@@ -151,6 +152,21 @@
     <div class="works__more">
       <button type="button" class="btn btn--ghost" data-works-more>Показать ещё объекты</button>
       <button type="button" class="btn btn--primary" data-open-lead data-lead-source="works-cta">Хочу такую же — рассчитайте</button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     ВИДЕО
+     ═══════════════════════════════════════════════════════════════════ -->
+<section class="section videos" id="videos">
+  <div class="container">
+    <div class="section__head">
+      <span class="section__kicker">Видео с объектов</span>
+      <h2 class="section__title">Посмотрите, как выглядят сданные парные</h2>
+    </div>
+    <div class="videos__grid" data-videos>
+      <!-- фасады рендерит assets/js/main.js -->
     </div>
   </div>
 </section>
@@ -342,26 +358,15 @@
       <!-- карточки рендерит assets/js/main.js из LUCH.stoves -->
     </div>
 
+    <div class="stoves__more">
+      <button type="button" class="btn btn--ghost" data-stoves-more hidden>Показать ещё</button>
+    </div>
+
     <p class="stoves__empty" data-stove-empty hidden>
       Под эти параметры готовой позиции в каталоге нет — но она почти наверняка есть на складе.
       <a href="#calc" class="js-scroll">Оставьте параметры парной</a>, подберём вручную.
     </p>
 
-    <div class="stovelive">
-      <p class="stovelive__label">Так эти печи выглядят на объектах</p>
-      <div class="stovelive__grid">
-        <img src="assets/img/works/luzki-2-3.webp" alt="Печь в кожухе из камня в готовой парной" loading="lazy" width="700" height="500">
-        <img src="assets/img/works/sunny-1.webp" alt="Печь и соляная стена в парной" loading="lazy" width="700" height="500">
-        <img src="assets/img/works/pokrovskoe-1.webp" alt="Кедровая парная с дровницей" loading="lazy" width="700" height="500">
-        <img src="assets/img/works/maslovo-3.webp" alt="Печь за защитным экраном" loading="lazy" width="700" height="500">
-        <img src="assets/img/works/sosnovii-bereg-2.webp" alt="Парная с печью в каменном портале" loading="lazy" width="700" height="500">
-        <img src="assets/img/works/tula-4.webp" alt="Каменный портал печи" loading="lazy" width="700" height="500">
-        <img src="assets/img/works/novorizsk-1.webp" alt="Парная с закрытой каменкой" loading="lazy" width="700" height="500">
-        <img src="assets/img/works/pestovo-3.webp" alt="Печь и полки из кедра" loading="lazy" width="700" height="500">
-        <img src="assets/img/works/luzki-2-4.webp" alt="Печь в парной, вид от входа" loading="lazy" width="700" height="500">
-        <img src="assets/img/works/happiness-3.webp" alt="Печь в кедровой парной" loading="lazy" width="700" height="500">
-      </div>
-    </div>
 
     <div class="stoves__cta">
       <div>
@@ -431,22 +436,22 @@
       <article class="gcard">
         <span class="gcard__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="4.5" y="2.75" width="15" height="18.5" rx="1"/><path d="M8.5 8h7M8.5 12h7M8.5 16h4"/></svg></span>
         <h3>Смета фиксируется в договоре</h3>
-        <p>Цена в договоре — окончательная. Дополнительные работы возможны только по вашему письменному согласию.</p>
+        <p>Цена окончательная, допработы — только по вашему письменному согласию</p>
       </article>
       <article class="gcard">
         <span class="gcard__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.75l7.5 3v6.4c0 4.2-3.1 7-7.5 9.1-4.4-2.1-7.5-4.9-7.5-9.1V5.75z"/><path d="M8.75 12l2.4 2.4 4.1-4.6"/></svg></span>
         <h3>Гарантия 12 месяцев</h3>
-        <p>На все работы. На печь и дымоход действует гарантия производителя — у части брендов она доходит до 30 лет.</p>
+        <p>На все работы. На печь и дымоход — гарантия производителя, до 30 лет</p>
       </article>
       <article class="gcard">
         <span class="gcard__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.75c3.1 4.3 5.2 5.9 5.2 9.4a5.2 5.2 0 0 1-10.4 0c0-3.5 2.1-5.1 5.2-9.4z"/><path d="M12 11.5c1.2 1.7 2 2.3 2 3.7a2 2 0 0 1-4 0c0-1.4.8-2 2-3.7z"/></svg></span>
         <h3>Пожарная&nbsp;безопасность</h3>
-        <p>Разделки, отступы и проход кровли делаем по нормам. Объект спокойно проходит проверку страховой.</p>
+        <p>Разделки, отступы и проход кровли — по нормам</p>
       </article>
       <article class="gcard">
         <span class="gcard__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="13" r="8.25"/><path d="M12 8.75V13l3 2M9.25 2.75h5.5"/></svg></span>
         <h3>Сроки в договоре</h3>
-        <p>10–15 рабочих дней на стандартную парную. Срыв срока по нашей вине — неустойка по договору.</p>
+        <p>10–15 рабочих дней. Срыв по нашей вине — неустойка</p>
       </article>
     </div>
 
@@ -476,21 +481,6 @@
     </div>
     <div class="reviews__grid" data-reviews>
       <!-- карточки рендерит assets/js/main.js -->
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════════════════════════════════════════════════════════════════
-     ВИДЕО
-     ═══════════════════════════════════════════════════════════════════ -->
-<section class="section videos" id="videos">
-  <div class="container">
-    <div class="section__head">
-      <span class="section__kicker">Видео с объектов</span>
-      <h2 class="section__title">Посмотрите, как выглядят сданные парные</h2>
-    </div>
-    <div class="videos__grid" data-videos>
-      <!-- фасады рендерит assets/js/main.js -->
     </div>
   </div>
 </section>
@@ -599,25 +589,14 @@
       </div>
     </div>
 
-    <form class="contacts__form" data-form="lead" data-lead-source="contacts" novalidate>
-      <h3>Задать вопрос или вызвать инженера</h3>
-      <input type="text" name="website" class="form-honey" tabindex="-1" autocomplete="off" aria-hidden="true">
-      <label class="field">
-        <span class="field__label">Имя</span>
-        <input class="input" type="text" name="name" placeholder="Как к вам обращаться" required minlength="2" autocomplete="name">
-      </label>
-      <label class="field">
-        <span class="field__label">Телефон</span>
-        <input class="input" type="tel" name="phone" placeholder="+7 (___) ___-__-__" required autocomplete="tel" inputmode="tel">
-      </label>
-      <label class="field">
-        <span class="field__label">Комментарий <i>— необязательно</i></span>
-        <textarea class="input" name="comment" rows="3" placeholder="Например: парная 2,5 × 2,2 м, нужна печь и отделка"></textarea>
-      </label>
-      <button type="submit" class="btn btn--primary btn--lg btn--block">Отправить</button>
-      <p class="policy">Нажимая кнопку, вы соглашаетесь с <a href="policy.html" target="_blank" rel="noopener">политикой обработки персональных данных</a>.</p>
-      <div class="form-status" role="status" aria-live="polite"></div>
-    </form>
+    <div class="contacts__act">
+      <h3>Написать или позвонить</h3>
+      <p>Ответим в рабочее время за 30 минут. Смету по вашей конфигурации пришлём в течение суток.</p>
+      <div class="contacts__act-btns">
+        <button type="button" class="btn btn--primary" data-open-lead data-lead-source="contacts">Получить смету</button>
+        <a class="btn btn--wa" data-wa-link target="_blank" rel="noopener">Написать в WhatsApp</a>
+      </div>
+    </div>
   </div>
 </section>
 

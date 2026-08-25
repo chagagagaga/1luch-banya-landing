@@ -145,11 +145,23 @@
       '</article>';
     }
 
+    var VISIBLE = 6;
+    var expanded = false;
+    var moreBtn = $('[data-stoves-more]');
+
     function draw() {
       var list = P.stoves.filter(match);
-      grid.innerHTML = list.map(card).join('');
+      var shown = expanded ? list : list.slice(0, VISIBLE);
+      grid.innerHTML = shown.map(card).join('');
       if (empty) empty.hidden = list.length > 0;
+      if (moreBtn) {
+        var rest = list.length - shown.length;
+        moreBtn.hidden = rest <= 0;
+        moreBtn.textContent = 'Показать ещё ' + rest + (rest === 1 ? ' печь' : (rest < 5 ? ' печи' : ' печей'));
+      }
     }
+
+    if (moreBtn) moreBtn.addEventListener('click', function () { expanded = true; draw(); });
 
     function wire(sel, key, attr) {
       var box = $(sel);
@@ -160,6 +172,7 @@
         $$('.chip', box).forEach(function (x) { x.classList.remove('is-on'); });
         b.classList.add('is-on');
         f[key] = b.dataset[attr];
+        expanded = false;
         draw();
       });
     }

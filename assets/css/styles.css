@@ -150,8 +150,8 @@ p, li, .section__lead, .hero__sub, figcaption { text-wrap: pretty; }
    ═════════════════════════════════════════════════════════════════════════ */
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: .55em;
-  padding: .95em 1.6em; border: 1px solid transparent; border-radius: var(--r-sm);
-  font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; line-height: 1.15; letter-spacing: -.015em;
+  padding: 1.05em 1.9em; border: 1px solid transparent; border-radius: var(--r-sm);
+  font-family: var(--font-display); font-size: .975rem; font-weight: 700; line-height: 1.15; letter-spacing: -.015em;
   text-align: center; white-space: nowrap; transition: transform var(--t), background var(--t), box-shadow var(--t), border-color var(--t);
 }
 .btn svg { width: 1.15em; height: 1.15em; flex: none; }
@@ -159,7 +159,7 @@ p, li, .section__lead, .hero__sub, figcaption { text-wrap: pretty; }
 .btn:active { transform: translateY(0); }
 .btn[disabled] { opacity: .55; cursor: not-allowed; transform: none; }
 
-.btn--primary { background: var(--fire); color: #fff; box-shadow: none; }
+.btn--primary { background: var(--fire); color: #fff; box-shadow: 0 6px 18px rgba(210, 80, 28, .28); }
 .btn--primary:hover { background: var(--fire-2); }
 
 .btn--ghost { background: transparent; border-color: currentColor; color: var(--text); }
@@ -174,8 +174,8 @@ p, li, .section__lead, .hero__sub, figcaption { text-wrap: pretty; }
 .btn--max { background: var(--max); color: #fff; }
 .btn--max:hover { background: #2c49d8; }
 
-.btn--sm { padding: .7em 1.15em; font-size: var(--fs-xs); }
-.btn--lg { padding: 1.1em 1.9em; font-size: 1rem; }
+.btn--sm { padding: .78em 1.3em; font-size: var(--fs-sm); }
+.btn--lg { padding: 1.2em 2.2em; font-size: 1.075rem; }
 .btn--block { display: flex; width: 100%; }
 
 .chips { display: flex; flex-wrap: wrap; gap: .5rem; }
@@ -539,6 +539,7 @@ textarea.input { resize: vertical; min-height: 88px; }
 .stove__price { display: flex; flex-direction: column; }
 .stove__price span { font-size: var(--fs-xs); color: var(--text-soft); }
 .stove__price b { font-family: var(--font-display); font-size: 1.15rem; font-weight: 700; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.stoves__more { display: flex; justify-content: center; margin-top: 1.5rem; }
 .stoves__empty { margin-top: 1.5rem; text-align: center; color: var(--text-soft); }
 .stoves__empty a { color: var(--fire); text-decoration: underline; }
 
@@ -607,6 +608,13 @@ textarea.input { resize: vertical; min-height: 88px; }
 .proofpair__stub span, .showroom__stub span { font-weight: 700; font-size: 1rem; }
 .proofpair__stub i, .showroom__stub i { font-style: normal; font-size: var(--fs-xs); }
 .showroom__stub { margin-top: 1.25rem; aspect-ratio: 16 / 9; }
+
+/* Блок действий в контактах вместо второй формы: она дублировала ту,
+   что стоит выше вместе с оффером. */
+.contacts__act { align-self: start; padding: clamp(1.4rem, 1rem + 1.4vw, 2.25rem); border-radius: var(--r-lg); background: var(--ink); color: var(--text-invert); }
+.contacts__act h3 { font-size: var(--fs-h3); }
+.contacts__act p { margin-top: .6rem; font-size: var(--fs-sm); color: var(--text-invert-soft); line-height: 1.55; }
+.contacts__act-btns { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: 1.35rem; }
 
 /* Шоурум: реальные снимки павильона. Первый кадр крупнее — по нему
    человека узнаёт место, когда доедет. */
@@ -1054,16 +1062,22 @@ textarea.input { resize: vertical; min-height: 88px; }
 .stovelive__grid img { flex: 0 1 calc((100% - .5rem * 4) / 5); min-width: 180px; }
 .stovelive__grid img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: var(--r); }
 
-/* ── 25.6 Фото в этапах 4–6 ─────────────────────────────────────────────── */
+/* ── 25.6 Фото в этапах 4–7 ─────────────────────────────────────────────
+   Три кадра из четырёх — реальная съёмка своей бригады: резка, сварка,
+   первая топка. Денис просил показывать этапы картинками, а не текстом;
+   настоящая работа здесь убедительнее любой генерации. Лиц в кадре нет
+   ни на одном снимке — согласие монтажников не требуется. */
 .steps__list .step:nth-child(4)::after,
 .steps__list .step:nth-child(5)::after,
-.steps__list .step:nth-child(6)::after {
+.steps__list .step:nth-child(6)::after,
+.steps__list .step:nth-child(7)::after {
   content: ''; display: block; aspect-ratio: 16 / 10; margin: .35rem -1.4rem -1.4rem;
   background: var(--paper-3) center / cover no-repeat;
 }
-.steps__list .step:nth-child(4)::after { background-image: url('../img/production/production-1.webp'); }
-.steps__list .step:nth-child(5)::after { background-image: url('../img/production/production-2.webp'); }
-.steps__list .step:nth-child(6)::after { background-image: url('../img/works/happiness-3.webp'); }
+.steps__list .step:nth-child(4)::after { background-image: url('../img/production/production-2.webp'); }
+.steps__list .step:nth-child(5)::after { background-image: url('../img/steps/montage-cut.webp'); }
+.steps__list .step:nth-child(6)::after { background-image: url('../img/steps/montage-weld.webp'); }
+.steps__list .step:nth-child(7)::after { background-image: url('../img/steps/first-fire.webp'); }
 .step { overflow: hidden; }
 
 /* ── 25.7 Фото объекта под отзывом ──────────────────────────────────────── */
