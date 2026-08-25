@@ -429,13 +429,19 @@ textarea.input { resize: vertical; min-height: 88px; }
 .calc__result { padding: 1.25rem; border-radius: var(--r); background: var(--ink); color: var(--text-invert); margin-bottom: 1rem; }
 .calc__result-row { display: flex; align-items: baseline; justify-content: space-between; gap: .75rem; flex-wrap: wrap; }
 .calc__result-row span { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .08em; color: rgba(248, 243, 234, .55); }
-.calc__result-row b { font-family: var(--font-display); font-size: clamp(1.5rem, 1.1rem + 1.6vw, 2.25rem); font-weight: 700; letter-spacing: -.03em; color: var(--amber); font-variant-numeric: tabular-nums; }
+.calc__result-row b { font-family: var(--font-display); font-size: clamp(1.3rem, 1rem + 1.1vw, 1.75rem); font-weight: 700; letter-spacing: -.03em; color: var(--amber); font-variant-numeric: tabular-nums; }
 .calc__result-gift {
   display: flex; align-items: flex-start; gap: .45rem; margin-top: .6rem; padding-top: .6rem;
   border-top: 1px solid var(--line-dark); font-size: var(--fs-xs); color: #a7e5bd;
 }
 .calc__gift-icon { color: var(--amber); }
 .calc__result-note { margin-top: .5rem; font-size: .68rem; color: rgba(248, 243, 234, .45); line-height: 1.4; }
+
+/* Цена до первого касания: вместо крупной суммы — спокойное приглашение.
+   Денис просил не выпячивать цифру на старте. */
+.calc__result--hidden { background: var(--paper-3); color: var(--text); }
+.calc__reveal { display: grid; gap: .8rem; }
+.calc__reveal p { font-size: var(--fs-sm); color: var(--text-soft); line-height: 1.45; }
 
 .calc__label--cta { margin-bottom: .5rem; }
 .calc-actions { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
@@ -1011,7 +1017,7 @@ textarea.input { resize: vertical; min-height: 88px; }
    Знак рубля приклеен к числу, перенос возможен только по тире. */
 .calc__result-row { display: block; }
 .calc__result-row span { display: block; max-width: none; line-height: 1.25; margin-bottom: .25rem; }
-.calc__result-row b { display: block; font-size: clamp(1.5rem, 1rem + 2vw, 2.15rem); line-height: 1.1; }
+.calc__result-row b { display: block; font-size: clamp(1.3rem, 1rem + 1.5vw, 1.7rem); line-height: 1.15; }
 .calc__result-row b i,
 .modal__summary-price b i { font-style: normal; white-space: nowrap; }
 .modal__summary-price b { white-space: normal; }

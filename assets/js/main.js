@@ -140,7 +140,7 @@
         '</div>' +
         '<footer class="stove__foot">' +
           '<div class="stove__price"><span>Цена</span><b>от ' + fmt(s.price) + ' ₽</b></div>' +
-          '<button type="button" class="btn btn--primary btn--sm" data-stove-cta="' + esc(s.id) + '">Заказать</button>' +
+          '<button type="button" class="btn btn--primary btn--sm" data-stove-cta="' + esc(s.id) + '">Узнать точную стоимость</button>' +
         '</footer>' +
       '</article>';
     }
@@ -184,15 +184,8 @@
       var b = e.target.closest('[data-stove-cta]');
       if (!b || !window.LuchCalc) return;
       var s = P.stoves.find(function (x) { return x.id === b.dataset.stoveCta; });
-      if (s) {
-        window.LuchCalc.state.fuel = s.fuel;
-        window.LuchCalc.state.tier = s.tier;
-        // Переводим объём подобранной печи обратно в площадь пола
-        var area = ((s.vmin + s.vmax) / 2) / P.calcRules.ceilingHeight;
-        window.LuchCalc.state.area = Math.min(P.ranges.area.max,
-          Math.max(P.ranges.area.min, Math.round(area * 2) / 2));
-      }
-      window.LuchCalc.open('stove');
+      if (!s) return;
+      window.LuchCalc.openStove(s, 'stove-card');
     });
 
     draw();

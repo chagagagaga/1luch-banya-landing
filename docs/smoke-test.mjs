@@ -58,7 +58,7 @@ const render = {
   'калькулятор отрисован':   q('[data-calc] .calc'),
   'вкладки сценария (3)':    q('[data-mode]'),
   'ползунки':                q('input[type=range]'),
-  'итог расчёта':            q('[data-total]'),
+  'кнопка «показать стоимость»': q('[data-reveal]'),
   'пакеты отделки (3)':      q('[data-pkg-card]'),
   'карточки печей':          q('.stove'),
   'объекты портфолио':       q('.work'),
@@ -75,6 +75,9 @@ console.log('— Рендер —');
 for (const [k, v] of Object.entries(render)) console.log(`  ${v ? '✓' : '✗'} ${k}: ${v}`);
 
 /* ── Интерактив ─────────────────────────────────────────────────────── */
+// Цена спрятана до первого касания — сначала раскрываем её кнопкой.
+const priceHiddenAtStart = !d.querySelector('[data-total]');
+click('[data-reveal]');
 const total0 = d.querySelector('[data-total]')?.textContent;
 
 // Сценариев теперь два: «Только печь» и «Парная под ключ».
@@ -136,6 +139,8 @@ const checks = {
   'карточка подобранной печи':        pickShown,
   'объём выводится из площади':       volShown,
   'площадь меняет модель печи':       pickBefore !== pickAfter,
+  'цена скрыта до касания':           priceHiddenAtStart,
+  'кнопка раскрывает цену':           !!total0,
   'площадь пересчитывает итог':       total0 !== totalAfter,
   'хамам: от 2 500 000 ₽ по проекту': hammamAuthor,
   'фильтр «электро» сужает выдачу':   stovesAfter > 0 && stovesAfter < stovesBefore,

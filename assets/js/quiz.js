@@ -53,6 +53,11 @@
     pkg: paramOneOf('pkg', ['comfort', 'premium', 'author'], 'comfort'),
     stoveOpts: new Set(P.stoveOptions.filter(function (o) { return o.default; }).map(function (o) { return o.id; })),
     stoveTune: false,              // раскрыт ли блок настройки печи
+    pinnedStove: null,             // печь, выбранная в каталоге вручную
+    // Правка Дениса: при загрузке цена не должна быть самым громким
+    // элементом экрана. Показываем её, как только человек тронул
+    // конфигуратор, — или по кнопке, если он ничего не трогал.
+    priceShown: false,
     finishOpts: new Set(),
     channel: 'whatsapp',
     stove: null,
@@ -136,7 +141,9 @@
 
   /* ---- Расчёт ------------------------------------------------------------ */
   function calc() {
-    state.stove = pickStove();
+    // Если человек ткнул конкретную печь в каталоге — считаем её, а не ту,
+    // которую подобрал бы алгоритм. Иначе в поп-апе окажется другая модель.
+    state.stove = state.pinnedStove || pickStove();
     state.byProject = false;
 
     // Хамам делается только в авторском исполнении
@@ -328,19 +335,24 @@
         '</div>' +
       '</details>' +
 
-      '<div class="calc__result" data-result>' +
-        '<div class="calc__result-row">' +
-          '<span>' + (state.byProject ? 'Ваш проект' : 'Ориентир по вашей конфигурации') + '</span>' +
-          '<b data-total>' + rangeHtml() + '</b>' +
-        '</div>' +
-        '<div class="calc__result-gift">' +
+      '<div class="calc__result' + (state.priceShown ? '' : ' calc__result--hidden') + '" data-result>' +
+        (state.priceShown
+          ? '<div class="calc__result-row">' +
+              '<span>' + (state.byProject ? 'Ваш проект' : 'Ориентир по вашей конфигурации') + '</span>' +
+              '<b data-total>' + rangeHtml() + '</b>' +
+            '</div>'
+          : '<div class="calc__reveal">' +
+              '<p>Расчёт готов. Цену показываем сразу, без звонка и заявки.</p>' +
+              '<button type="button" class="btn btn--primary btn--block" data-reveal>Показать стоимость</button>' +
+            '</div>') +
+        (state.priceShown ? '<div class="calc__result-gift">' +
           '<span class="calc__gift-icon" aria-hidden="true">★</span>' + esc(P.promo.title) +
-        '</div>' +
-        '<p class="calc__result-note">' +
+        '</div>' : '') +
+        (state.priceShown ? '<p class="calc__result-note">' +
           (state.byProject
             ? 'Авторский проект и хамам считаются индивидуально: состав работ и материалы каждый раз свои, верхней границы нет. Инженер посчитает после замера.'
             : 'Диапазон, а не финальная цена: на итог влияют объём парной, выбранная печь и инженерные решения. Точную смету инженер посчитает после замера.') +
-        '</p>' +
+        '</p>' : '') +
       '</div>' +
 
       '<div class="calc__cta">' +
@@ -366,7 +378,17 @@
     el.style.setProperty('--fill', (((+el.value - min) / (max - min)) * 100).toFixed(1) + '%');
   }
 
+  // Первое же действие в конфигураторе показывает цену: прятать её от
+  // человека, который уже что-то выбирает, бессмысленно.
+  function reveal() {
+    if (state.priceShown) return false;
+    state.priceShown = true;
+    render();
+    return true;
+  }
+
   function updateResult() {
+    if (reveal()) return;
     calc();
     var el = root.querySelector('[data-total]');
     if (el) el.innerHTML = rangeHtml();
@@ -375,6 +397,7 @@
   }
 
   function updatePick() {
+    if (reveal()) return;
     calc();
     var pick = root.querySelector('[data-pick]');
     if (pick && state.stove) {
@@ -391,7 +414,7 @@
 
   function bind() {
     root.querySelectorAll('[data-mode]').forEach(function (b) {
-      b.addEventListener('click', function () { state.mode = b.dataset.mode; render(); });
+      b.addEventListener('click', function () { state.mode = b.dataset.mode; state.priceShown = true; render(); });
     });
 
     var area = root.querySelector('[data-area]');
@@ -416,16 +439,16 @@
     });
 
     root.querySelectorAll('[data-steam-id]').forEach(function (b) {
-      b.addEventListener('click', function () { state.steamType = b.dataset.steamId; render(); });
+      b.addEventListener('click', function () { state.steamType = b.dataset.steamId; state.priceShown = true; render(); });
     });
     root.querySelectorAll('[data-pkg-id]').forEach(function (b) {
-      b.addEventListener('click', function () { if (!b.disabled) { state.pkg = b.dataset.pkgId; render(); } });
+      b.addEventListener('click', function () { if (!b.disabled) { state.pkg = b.dataset.pkgId; state.priceShown = true; render(); } });
     });
     root.querySelectorAll('[data-fuel-id]').forEach(function (b) {
-      b.addEventListener('click', function () { state.fuel = b.dataset.fuelId; render(); });
+      b.addEventListener('click', function () { state.fuel = b.dataset.fuelId; state.priceShown = true; render(); });
     });
     root.querySelectorAll('[data-tier-id]').forEach(function (b) {
-      b.addEventListener('click', function () { state.tier = b.dataset.tierId; render(); });
+      b.addEventListener('click', function () { state.tier = b.dataset.tierId; state.priceShown = true; render(); });
     });
 
     var fo = root.querySelector('[data-finish-opts]');
@@ -439,6 +462,9 @@
       var b = e.target.closest('[data-opt]'); if (!b) return;
       toggle(state.stoveOpts, b.dataset.opt); b.classList.toggle('is-on'); updateResult();
     });
+
+    var rev = root.querySelector('[data-reveal]');
+    if (rev) rev.addEventListener('click', function () { state.priceShown = true; render(); });
 
     var tune = root.querySelector('[data-stove-tune]');
     if (tune) tune.addEventListener('toggle', function () { state.stoveTune = tune.open; });
@@ -636,6 +662,20 @@
       if (form && source) form.dataset.leadSource = source;
       openModal();
     },
+    /* Поп-ап со стоимостью конкретной печи прямо из каталога: человек
+       не уезжает к калькулятору, цена показывается на месте. */
+    openStove: function (stove, source) {
+      state.mode = 'stove';
+      state.priceShown = true;
+      state.pinnedStove = stove;
+      state.fuel = stove.fuel;
+      state.tier = stove.tier;
+      var area = ((stove.vmin + stove.vmax) / 2) / RULES.ceilingHeight;
+      state.area = Math.min(R.area.max, Math.max(R.area.min, Math.round(area * 2) / 2));
+      render();
+      this.openModal(source || 'stove-card');
+    },
+    unpinStove: function () { state.pinnedStove = null; },
     state: state,
   };
 
