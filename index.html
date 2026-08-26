@@ -64,7 +64,8 @@
         <a href="tel:+79163160089" data-phone-link>+7 (916) 316-00-89</a>
         <span>Ежедневно 9:00–21:00</span>
       </div>
-      <a href="#calc" class="btn btn--primary btn--sm js-scroll">Рассчитать</a>
+      <button type="button" class="btn btn--primary btn--sm" data-open-lead data-lead-source="header">Рассчитать</button>
+      <a class="header__max" data-max-link target="_blank" rel="noopener" aria-label="Написать в MAX" hidden><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm4.3 13.7-2.1-3.1-2.2 2.6a.9.9 0 0 1-1.4 0l-2.2-2.6-2.1 3.1a.85.85 0 1 1-1.4-.95l2.8-4.1a.9.9 0 0 1 1.4-.1l2.2 2.6 2.2-2.6a.9.9 0 0 1 1.4.1l2.8 4.1a.85.85 0 1 1-1.4.95Z"/></svg></a>
       <button class="burger" data-burger aria-label="Меню" aria-expanded="false"><span></span><span></span><span></span></button>
     </div>
   </div>
@@ -671,6 +672,16 @@
     <span>Информация на сайте не является публичной офертой.</span>
   </div>
 </footer>
+
+<!-- Плавающие мессенджеры: только десктоп, нижний правый угол -->
+<div class="msgdock" data-msgdock hidden>
+  <a class="msgdock__btn msgdock__btn--max" data-max-link target="_blank" rel="noopener" aria-label="Написать в MAX" hidden>
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm4.3 13.7-2.1-3.1-2.2 2.6a.9.9 0 0 1-1.4 0l-2.2-2.6-2.1 3.1a.85.85 0 1 1-1.4-.95l2.8-4.1a.9.9 0 0 1 1.4-.1l2.2 2.6 2.2-2.6a.9.9 0 0 1 1.4.1l2.8 4.1a.85.85 0 1 1-1.4.95Z"/></svg><span>MAX</span>
+  </a>
+  <a class="msgdock__btn msgdock__btn--tg" data-tg-link target="_blank" rel="noopener" aria-label="Написать в Telegram" hidden>
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.9 4.3 18.9 19c-.2 1-.8 1.3-1.7.8l-4.6-3.4-2.2 2.1c-.2.2-.5.5-1 .5l.3-4.7 8.5-7.7c.4-.3-.1-.5-.6-.2L7.1 12.9l-4.5-1.4c-1-.3-1-1 .2-1.4l17.7-6.8c.8-.3 1.5.2 1.4 1Z"/></svg><span>Telegram</span>
+  </a>
+</div>
 
 <!-- Мобильная липкая панель -->
 <div class="mobilebar" data-mobilebar>
