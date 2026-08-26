@@ -150,6 +150,7 @@ main > section:nth-of-type(n+4) { content-visibility: auto; contain-intrinsic-si
 .msgdock__btn:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(16, 14, 11, .34); }
 .msgdock__btn--max { background: var(--max); }
 .msgdock__btn--tg { background: var(--tg); }
+.msgdock__btn--wa { background: var(--wa); }
 /* Подпись выезжает при наведении: кружок остаётся компактным, но
    человеку не нужно гадать, куда он попадёт. */
 .msgdock__btn span {

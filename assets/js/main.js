@@ -46,7 +46,7 @@
     (function msgDock() {
       var dock = $('[data-msgdock]');
       if (!dock) return;
-      var any = !!(c.maxUrl || c.telegram);
+      var any = !!(c.maxUrl || c.telegram || c.whatsapp);
       dock.hidden = !any;
     })();
 
