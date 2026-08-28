@@ -604,6 +604,10 @@
         '<a href="' + window.LuchLead.thanksUrl + '" class="btn btn--primary btn--lg btn--block">Хорошо</a>' +
       '</div>';
     wrap.querySelector('[data-close]').addEventListener('click', close);
+    // Экран успеха затирает форму. Помечаем модалку отработавшей, чтобы при
+    // следующем открытии её собрали заново: иначе человек, отправивший
+    // заявку, больше не может открыть форму — ни одна кнопка не срабатывает.
+    wrap.dataset.done = '1';
     setTimeout(function () { location.assign(window.LuchLead.thanksUrl); }, 2500);
   }
 
@@ -631,6 +635,9 @@
   }
 
   function openModal() {
+    // Модалка после успешной отправки одноразовая: выбрасываем её и собираем
+    // чистую, чтобы повторная заявка работала.
+    if (modal && modal.dataset.done) { modal.remove(); modal = null; }
     if (!modal) modal = buildModal();
     syncChannel();
     fillSummary();
