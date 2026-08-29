@@ -545,10 +545,12 @@
         '<h3 class="modal__title" id="modal-title" data-modal-title></h3>' +
         '<p class="modal__sub" data-modal-sub></p>' +
         '<div class="modal__channels" data-channels>' +
-          '<button type="button" class="modal__chan" data-chan="whatsapp"><b>WhatsApp</b></button>' +
-          '<button type="button" class="modal__chan" data-chan="telegram"><b>Telegram</b></button>' +
-          '<button type="button" class="modal__chan" data-chan="max"><b>MAX</b></button>' +
+          // Звонок первым: он не требует от человека ничего, кроме номера.
+          // Дальше мессенджеры в порядке популярности в России.
           '<button type="button" class="modal__chan" data-chan="call"><b>Звонок</b></button>' +
+          '<button type="button" class="modal__chan" data-chan="max"><b>MAX</b></button>' +
+          '<button type="button" class="modal__chan" data-chan="telegram"><b>Telegram</b></button>' +
+          '<button type="button" class="modal__chan" data-chan="whatsapp"><b>WhatsApp</b></button>' +
         '</div>' +
         '<form data-form="lead" data-lead-source="calc" novalidate>' +
           '<input type="text" name="website" class="form-honey" tabindex="-1" autocomplete="off" aria-hidden="true">' +

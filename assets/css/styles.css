@@ -137,7 +137,7 @@ main > section:nth-of-type(n+4) { content-visibility: auto; contain-intrinsic-si
 .msgdock {
   position: fixed; right: clamp(1rem, .5rem + 1.2vw, 1.75rem);
   bottom: clamp(1rem, .5rem + 1.2vw, 1.75rem);
-  z-index: 55; display: flex; flex-direction: column-reverse; gap: .6rem;
+  z-index: 55; display: flex; flex-direction: column; gap: .6rem;
 }
 .msgdock[hidden] { display: none; }
 .msgdock__btn {
@@ -148,7 +148,10 @@ main > section:nth-of-type(n+4) { content-visibility: auto; contain-intrinsic-si
 }
 .msgdock__btn svg { width: 26px; height: 26px; }
 .msgdock__btn:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(16, 14, 11, .34); }
-.msgdock__btn--max { background: var(--max); }
+/* У знака MAX своя фирменная плашка с градиентом: круглый фон под ней
+   превращал логотип в белое пятно. Знак занимает кнопку целиком. */
+.msgdock__btn--max { background: none; box-shadow: none; }
+.msgdock__btn--max svg { width: 100%; height: 100%; border-radius: 22%; box-shadow: 0 8px 22px rgba(16, 14, 11, .32); }
 .msgdock__btn--tg { background: var(--tg); }
 .msgdock__btn--wa { background: var(--wa); }
 /* Подпись выезжает при наведении: кружок остаётся компактным, но
@@ -305,7 +308,8 @@ textarea.input { resize: vertical; min-height: 88px; }
 .header__phone a { font-weight: 700; font-size: .98rem; letter-spacing: -.01em; }
 .header__phone span { font-size: .68rem; color: var(--text-invert-soft); }
 
-.burger { display: none; width: 42px; height: 42px; border: 1px solid rgba(246, 242, 234, .3); border-radius: var(--r-sm); background: transparent; padding: 0; position: relative; }
+/* Бургер без обводки: рамка спорила с кнопкой «Рассчитать» рядом */
+.burger { display: none; width: 40px; height: 40px; border: 0; background: transparent; padding: 0; position: relative; }
 .burger span { position: absolute; left: 11px; right: 11px; height: 2px; background: var(--text-invert); border-radius: 2px; transition: transform var(--t), opacity var(--t); }
 .burger span:nth-child(1) { top: 14px; }
 .burger span:nth-child(2) { top: 20px; }
@@ -1021,8 +1025,16 @@ textarea.input { resize: vertical; min-height: 88px; }
   .header__right .btn { padding: .65em .85em; }
   /* MAX рядом с «Рассчитать»: на телефоне шапка — единственное место,
      где мессенджер виден без прокрутки. */
-  .header__max { display: grid; place-items: center; width: 40px; height: 40px; flex: none; border-radius: 50%; background: var(--max); color: #fff; }
-  .header__max svg { width: 22px; height: 22px; }
+  /* Знак MAX с подписью: без неё иконку принимают за абстрактную.
+     Фон не нужен — у самого знака он свой, фирменный. Блок сдвинут вниз
+     на половину высоты подписи, чтобы знак совпал по центру с кнопкой. */
+  .header__max {
+    position: relative; top: 3px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 2px; flex: none; width: 44px; margin-left: .5rem; padding: 0; background: none;
+  }
+  .header__max i { font-style: normal; font-size: .5rem; font-weight: 700; letter-spacing: .12em; color: var(--text-invert-soft); line-height: 1; }
+  .header__max svg { width: 28px; height: 28px; display: block; }
   /* Плавающие кружки перекрывали бы нижнюю панель */
   .msgdock { display: none !important; }
   .nav { inset: 62px 0 auto; }
