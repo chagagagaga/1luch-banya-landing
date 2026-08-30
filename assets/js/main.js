@@ -54,11 +54,20 @@
     // WhatsApp — запасной. Обе сразу не помещаются рядом с телефоном
     // и кнопкой расчёта.
     (function barMessenger() {
-      var max = document.querySelector('.mobilebar [data-max-link]');
-      var wa = document.querySelector('.mobilebar [data-wa-link]');
-      if (!max || !wa) return;
-      if (c.maxUrl) { max.hidden = false; wa.hidden = true; }
-      else { max.hidden = true; wa.hidden = !c.whatsapp; }
+      // Слот один: показываем первый заполненный по приоритету MAX →
+      // Telegram → WhatsApp. Три кнопки подряд не помещаются рядом
+      // с телефоном и расчётом.
+      var slots = [['[data-max-link]', c.maxUrl],
+                   ['[data-tg-link]', c.telegram],
+                   ['[data-wa-link]', c.whatsapp]];
+      var taken = false;
+      slots.forEach(function (pair) {
+        var el = document.querySelector('.mobilebar ' + pair[0]);
+        if (!el) return;
+        var show = !taken && !!pair[1];
+        el.hidden = !show;
+        if (show) taken = true;
+      });
     })();
 
     $$('[data-phone-link]').forEach(function (a) {

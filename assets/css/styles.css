@@ -129,6 +129,7 @@ input, textarea, select, button { font-family: inherit; font-size: inherit; }
 main > section:nth-of-type(n+4) { content-visibility: auto; contain-intrinsic-size: auto 800px; }
 
 .mobilebar__btn--max { background: var(--max); color: #fff; }
+.mobilebar__btn--tg { background: var(--tg); color: #fff; }
 
 /* ═══ Плавающие мессенджеры (только десктоп) ══════════════════════════════
    Два кружка в нижнем правом углу: клик уводит прямо в переписку.
