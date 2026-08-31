@@ -710,6 +710,12 @@ textarea.input { resize: vertical; min-height: 88px; }
 .proofpair figcaption { display: flex; flex-direction: column; gap: .2rem; font-size: var(--fs-sm); color: var(--text-soft); line-height: 1.5; }
 .proofpair figcaption b { font-size: 1rem; color: var(--text); }
 .proofpair figcaption .btn { align-self: start; margin-top: .55rem; }
+/* Скрин договора удалён по правке Влада — в блоке остался один кадр.
+   Во всю ширину он смотрелся баннером, поэтому кладём его и подпись
+   в строку: картинка слева, текст справа. */
+.proofpair--single figure { flex-direction: row; align-items: center; gap: var(--gap); }
+.proofpair--single figure > :first-child { flex: 1 1 58%; min-width: 0; }
+.proofpair--single figcaption { flex: 1 1 42%; }
 
 /* Условия договора: реальный текст вместо иконки — правка Дениса
    «покажи договор». Вёрстка, а не картинка: текст читается на любом экране,
@@ -1028,6 +1034,7 @@ textarea.input { resize: vertical; min-height: 88px; }
   .hero__cta .btn { width: 100%; }
 
   .faq__inner { grid-template-columns: minmax(0, 1fr); }
+  .proofpair--single figure { flex-direction: column; }
   .footer__inner { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 

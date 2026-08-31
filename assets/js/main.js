@@ -238,13 +238,13 @@
       var ph = photos(w);
       return '' +
       '<article class="work' + (idx >= VISIBLE ? ' is-hidden' : '') + '" data-work="' + esc(w.id) + '">' +
-        '<button type="button" class="work__btn" data-open-work="' + idx + '" aria-label="Открыть галерею: ' + esc(w.title) + '">' +
-          '<img src="' + esc(ph[0]) + '" alt="' + esc(w.title) + ', ' + esc(w.place) + '" loading="lazy" decoding="async" width="600" height="450">' +
+        '<button type="button" class="work__btn" data-open-work="' + idx + '" aria-label="Открыть галерею: ' + esc(w.place) + ', ' + esc(w.title) + '">' +
+          '<img src="' + esc(ph[0]) + '" alt="' + esc(w.place) + ': ' + esc(w.title) + '" loading="lazy" decoding="async" width="600" height="450">' +
           '<span class="work__count">' + ph.length + ' фото</span>' +
         '</button>' +
         '<div class="work__meta">' +
-          '<h3>' + esc(w.title) + '</h3>' +
-          '<p>' + esc(w.place) + ' · ' + esc(w.area) + ' · пакет «' + esc(w.pkg) + '»</p>' +
+          '<h3>' + esc(w.place) + '</h3>' +
+          '<p>' + esc(w.title) + ' · ' + esc(w.area) + ' · пакет «' + esc(w.pkg) + '»</p>' +
         '</div>' +
       '</article>';
     }).join('');
@@ -300,7 +300,7 @@
       cur.photo = (cur.photo + ph.length) % ph.length;
       $('[data-lb-img]', lb).src = ph[cur.photo];
       $('[data-lb-img]', lb).alt = w.title + ', фото ' + (cur.photo + 1);
-      $('[data-lb-cap]', lb).textContent = w.title + ' · ' + w.place + ' · ' + w.area +
+      $('[data-lb-cap]', lb).textContent = w.place + ' · ' + w.title + ' · ' + w.area +
         ' · пакет «' + w.pkg + '» · ' + (cur.photo + 1) + '/' + ph.length;
     }
     function step(d) { cur.photo += d; show(); }
@@ -387,6 +387,7 @@
           '<h3>' + esc(s.title) + '</h3>' +
           '<p>' + esc(s.text) + '</p>' +
         '</div>' +
+        (s.day ? '<span class="step__day">' + esc(s.day) + '</span>' : '') +
       '</li>';
     }).join('');
   })();

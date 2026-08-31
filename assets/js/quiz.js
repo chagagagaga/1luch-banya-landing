@@ -255,8 +255,7 @@
           '<input type="range" min="' + R.area.min + '" max="' + R.area.max + '" step="' + R.area.step + '" value="' + state.area + '" data-area aria-label="Площадь парной в м²">' +
           '<div class="calc-range__scale"><span>' + R.area.min + ' м²</span><span>' + R.area.max + ' м²</span></div>' +
         '</div>' +
-        '<p class="calc__hint">Площадь пола при высоте потолка 2,4 м. Расчётный объём — <b data-vol>' + volume() + ' м³</b>. ' +
-          'Знаете точную высоту и объём — скажите менеджеру, он пересчитает под ваши цифры.</p>' +
+        '<p class="calc__hint">Площадь пола при высоте потолка 2,4 м. Расчётный объём — <b data-vol>' + volume() + ' м³</b>.</p>' +
       '</div>' +
 
       '<div class="calc__field">' +
