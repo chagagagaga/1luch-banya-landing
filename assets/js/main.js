@@ -114,8 +114,6 @@
         '<ul class="pkg__list">' +
           p.includes.map(function (i) { return '<li>' + esc(i) + '</li>'; }).join('') +
         '</ul>' +
-        (p.notIncluded && p.notIncluded.length
-          ? '<p class="pkg__not">Не входит: ' + p.notIncluded.map(esc).join(', ') + '</p>' : '') +
         '<button type="button" class="btn ' + (p.popular ? 'btn--primary' : 'btn--ghost') + ' btn--block" ' +
           'data-open-pkg="' + p.id + '">' + (open ? 'Обсудить проект' : 'Рассчитать в этом пакете') + '</button>' +
       '</article>';
@@ -136,7 +134,9 @@
     var empty = $('[data-stove-empty]');
     var f = { v: 'all', f: 'all', t: 'all' };
 
-    var TIER_LABEL = { base: 'Бюджет', mid: 'Оптимум', premium: 'Премиум' };
+    // Правка 12: на лендинге живут только три названия уровня —
+    // Комфорт, Премиум, Авторский. «Бюджет» и «Оптимум» убраны.
+    var TIER_LABEL = { comfort: 'Комфорт', premium: 'Премиум', author: 'Авторский' };
 
     function match(s) {
       if (f.f !== 'all' && s.fuel !== f.f) return false;
@@ -387,7 +387,6 @@
           '<h3>' + esc(s.title) + '</h3>' +
           '<p>' + esc(s.text) + '</p>' +
         '</div>' +
-        '<span class="step__day">' + esc(s.day) + '</span>' +
       '</li>';
     }).join('');
   })();

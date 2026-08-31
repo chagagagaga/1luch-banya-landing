@@ -86,17 +86,24 @@ click('[data-mode="stove"]');
 const stoveOnly = !d.querySelector('[data-pkg-id]') && !!d.querySelector('[data-area]');
 click('[data-mode="full"]');
 const fullHasPkg = !!d.querySelector('[data-pkg-id]') && !!d.querySelector('[data-steam-id]');
-const pickShown = q('[data-pick]') > 0;
+// Правка Влада 31.08.2026: печь к проекту парной не привязывается —
+// в сценарии «под ключ» карточки конкретной модели быть не должно.
+const noStoveTied = q('[data-pick]') === 0;
 
 // Считаем в квадратах, объём для печи выводится из площади
 const volShown = /м³/.test(d.querySelector('[data-vol]')?.textContent || '');
 
 const area = d.querySelector('[data-area]');
-const pickBefore = d.querySelector('.calc-pick__name')?.textContent;
 if (area) { area.value = 18; area.dispatchEvent(new window.Event('input', { bubbles: true })); }
-const pickAfter = d.querySelector('.calc-pick__name')?.textContent;
 const totalAfter = d.querySelector('[data-total]')?.textContent;
 if (area) { area.value = 6; area.dispatchEvent(new window.Event('input', { bubbles: true })); }
+
+// Стекло считаем штуками: дверь или окно внутри дома +1 м³, на улицу +2 м³.
+const volNum = () => parseInt(d.querySelector('[data-vol]')?.textContent || '0', 10);
+const volBefore = volNum();
+click('[data-glass-step="out"][data-delta="1"]');
+const volAfter = volNum();
+click('[data-glass-step="out"][data-delta="-1"]');
 
 // Хамам делается только в авторском исполнении: точка входа 2 500 000 ₽,
 // верхней границы нет — считается по проекту
@@ -136,9 +143,9 @@ const utmOk = attr?.last_touch?.marks?.utm_source === 'yandex' && attr?.last_tou
 const checks = {
   'вкладка «печь» прячет пакеты':     stoveOnly,
   'в «под ключ» есть тип и пакет':    fullHasPkg,
-  'карточка подобранной печи':        pickShown,
+  'печь не привязана к проекту':      noStoveTied,
   'объём выводится из площади':       volShown,
-  'площадь меняет модель печи':       pickBefore !== pickAfter,
+  'стекло на улицу добавляет 2 м³':   volAfter === volBefore + 2,
   'цена скрыта до касания':           priceHiddenAtStart,
   'кнопка раскрывает цену':           !!total0,
   'площадь пересчитывает итог':       total0 !== totalAfter,
@@ -155,7 +162,7 @@ const checks = {
 console.log('\n— Интерактив —');
 for (const [k, v] of Object.entries(checks)) console.log(`  ${v ? '✓' : '✗'} ${k}`);
 
-console.log(`\n  подбор печи: ${pickBefore} → ${pickAfter}`);
+console.log(`\n  объём со стеклом: ${volBefore} → ${volAfter} м³`);
 console.log(`  итог: ${total0} → ${totalAfter}`);
 console.log(`  печей в выдаче: ${stovesBefore} → ${stovesAfter} (только электро)`);
 

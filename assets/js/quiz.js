@@ -6,8 +6,17 @@
    поэтому она входит в оба сценария.
 
    Считаем в квадратных метрах пола при стандартной высоте 2,4 м: заказчик знает
-   площадь и почти никогда не знает кубатуру. Объём для подбора печи получаем
-   пересчётом, с поправками на стекло и холодные стены.
+   площадь и почти никогда не знает кубатуру. Объём получаем пересчётом,
+   с поправкой на стеклянные элементы.
+
+   ПРАВКИ ВЛАДА 31.08.2026 — что калькулятор теперь НЕ делает:
+     · не привязывает к проекту конкретную печь, дымоход и обвязку;
+     · не показывает цены допов: наш уровень — диапазон, а не смета;
+     · не спрашивает «дрова или электро» и класс печи — это разговор
+       с менеджером, а модели живут в каталоге ниже по странице;
+     · не берёт +50% за внешнюю стену — вместо этого считаем стеклянные
+       элементы: дверь или окно внутри дома +1 м³, на улицу +2 м³.
+   Цена парной под ключ пересчитывается по метражу от прайса Влада.
 
    ВАЖНО для дизайна: логика цепляется за data-* атрибуты — см. docs/DESIGN_BRIEF.md.
    ========================================================================== */
@@ -45,14 +54,11 @@
   var state = {
     mode: paramOneOf('product', ['stove', 'full'], 'full'),
     area: R.area.default,          // м² пола парной
-    glass: 0,                      // м² стекла — каждый метр добавляет 1 м³
-    coldWall: false,               // улица или неутеплённая стена: +50%
+    glassIn: 0,                    // стеклянные двери и окна внутри дома: +1 м³ каждое
+    glassOut: 0,                   // стекло или стена на улицу: +2 м³ каждое
     fuel: 'wood',
-    tier: 'mid',
     steamType: 'russian',
     pkg: paramOneOf('pkg', ['comfort', 'premium', 'author'], 'comfort'),
-    stoveOpts: new Set(P.stoveOptions.filter(function (o) { return o.default; }).map(function (o) { return o.id; })),
-    stoveTune: false,              // раскрыт ли блок настройки печи
     pinnedStove: null,             // печь, выбранная в каталоге вручную
     // Правка Дениса: при загрузке цена не должна быть самым громким
     // элементом экрана. Показываем её, как только человек тронул
@@ -69,12 +75,6 @@
   var MODES = [
     { id: 'stove', label: 'Только печь', hint: 'Подбор и монтаж' },
     { id: 'full',  label: 'Парная под ключ', hint: 'Отделка вместе с печью', best: true },
-  ];
-
-  var TIERS = [
-    { id: 'base',    label: 'Бюджет' },
-    { id: 'mid',     label: 'Оптимум' },
-    { id: 'premium', label: 'Премиум' },
   ];
 
   /* ---- Утилиты ----------------------------------------------------------- */
@@ -98,31 +98,32 @@
   }
 
   /* ---- Расчётный объём парной -------------------------------------------
-     Площадь × высота 2,4 м, плюс кубометр на каждый квадрат стекла,
-     плюс 50% если стена выходит на улицу или не утеплена.
-     Кирпичная стена в расчёт не идёт.
+     Площадь × высота 2,4 м, плюс стекло: дверь или окно внутри дома даёт
+     +1 м³, стекло или стена на улицу — +2 м³. Кирпичная стена в расчёт
+     не идёт. Надбавки «+50% за внешнюю стену» больше нет — правка Влада.
   ------------------------------------------------------------------------- */
   function volume() {
-    var v = state.area * RULES.ceilingHeight + state.glass * RULES.glassPerM2;
-    if (state.coldWall) v *= (1 + RULES.coldWallSurcharge);
-    return Math.round(v);
+    return Math.round(
+      state.area * RULES.ceilingHeight +
+      state.glassIn * RULES.glassInside +
+      state.glassOut * RULES.glassOutside
+    );
   }
 
-  /* ---- Подбор печи под объём -------------------------------------------- */
-  function pickStove() {
+  /* ---- Печи, подходящие под объём ----------------------------------------
+     Конкретную модель калькулятор больше не называет: в сценарии «только
+     печь» показываем диапазон по всем подходящим печам, а модель человек
+     выбирает сам в каталоге ниже.
+  ------------------------------------------------------------------------- */
+  function fitStoves() {
     var vol = volume();
-    var list = P.stoves.filter(function (s) {
-      return s.fuel === state.fuel && vol >= s.vmin - 2 && vol <= s.vmax + 2;
-    });
-    if (!list.length) list = P.stoves.filter(function (s) { return s.fuel === state.fuel; });
-    var order = { base: 0, mid: 1, premium: 2 };
-    var want = order[state.tier];
-    list.sort(function (a, b) {
-      var da = Math.abs(order[a.tier] - want), db = Math.abs(order[b.tier] - want);
-      if (da !== db) return da - db;
-      return Math.abs((a.vmin + a.vmax) / 2 - vol) - Math.abs((b.vmin + b.vmax) / 2 - vol);
-    });
-    return list[0] || null;
+    var list = P.stoves.filter(function (s) { return vol >= s.vmin - 2 && vol <= s.vmax + 2; });
+    return list.length ? list : P.stoves.slice();
+  }
+
+  function stoveBand() {
+    var prices = fitStoves().map(function (s) { return s.price; });
+    return { min: Math.min.apply(null, prices), max: Math.max.apply(null, prices) };
   }
 
   function currentPkg() {
@@ -139,24 +140,34 @@
     return b[state.steamType] || b.russian || null;
   }
 
-  /* ---- Расчёт ------------------------------------------------------------ */
+  /* ---- Расчёт ------------------------------------------------------------
+     Парная под ключ: берём диапазон прайса, посчитанный на 6 м², и
+     пересчитываем его по метражу. Ни печь, ни дымоход, ни допы отдельными
+     строчками в цену не входят — они внутри диапазона (правки Влада).
+  ------------------------------------------------------------------------- */
   function calc() {
-    // Если человек ткнул конкретную печь в каталоге — считаем её, а не ту,
-    // которую подобрал бы алгоритм. Иначе в поп-апе окажется другая модель.
-    state.stove = state.pinnedStove || pickStove();
     state.byProject = false;
 
     // Хамам делается только в авторском исполнении
     if (state.steamType === 'hammam') state.pkg = 'author';
 
-    var stovePart = state.stove ? state.stove.price : 0;
-    P.stoveOptions.forEach(function (o) { if (state.stoveOpts.has(o.id)) stovePart += o.price; });
-
     if (state.mode === 'stove') {
-      state.total = Math.round(stovePart / 1000) * 1000;
-      state.totalMax = Math.round(stovePart * 1.18 / 1000) * 1000;
+      // Печь отдельным товаром. Если человек ткнул конкретную модель
+      // в каталоге — показываем её, иначе диапазон по подходящим печам.
+      state.stove = state.pinnedStove;
+      if (state.stove) {
+        state.total = Math.round(state.stove.price / 1000) * 1000;
+        state.totalMax = Math.round(state.stove.price * 1.18 / 1000) * 1000;
+      } else {
+        var sb = stoveBand();
+        state.total = Math.round(sb.min / 1000) * 1000;
+        state.totalMax = Math.round(sb.max / 1000) * 1000;
+      }
       return;
     }
+
+    // Парная под ключ: печь к проекту не привязываем.
+    state.stove = null;
 
     var pkg = currentPkg();
     var band = priceBand(pkg);
@@ -170,18 +181,12 @@
       return;
     }
 
-    var rate = state.steamType === 'finnish' ? 'finnish' : 'russian';
-    var finishPart = state.area * pkg.pricePerM2[rate];
-    P.finishOptions.forEach(function (o) { if (state.finishOpts.has(o.id)) finishPart += o.price; });
-
-    // Печь входит в отделку во всех пакетах
-    var total = finishPart + stovePart;
-    // Держим цену внутри прайса: не ниже нижней границы и не уже верхней.
-    var low = band ? Math.max(total, band.min) : total;
-    var high = total * 1.22;
-    if (band && band.max) high = Math.max(high, band.max);
-    state.total = Math.round(low / 1000) * 1000;
-    state.totalMax = Math.round(high / 1000) * 1000;
+    // Пересчёт по метражу от базовых 6 м², на которые посчитан прайс.
+    // Меньше базовой площади цена не опускается: нижняя граница прайса —
+    // это порог, ниже которого мы за парную не беремся.
+    var k = Math.max(1, state.area / (RULES.baseArea || 6));
+    state.total = band ? Math.round(band.min * k / 1000) * 1000 : 0;
+    state.totalMax = band && band.max ? Math.round(band.max * k / 1000) * 1000 : 0;
   }
 
   // Подпись диапазона пакета: «850 000 – 1 500 000 ₽» или «от 2 500 000 ₽».
@@ -193,12 +198,29 @@
   }
 
   /* ---- Разметка ---------------------------------------------------------- */
+  // Цены у допов больше нет: отметка нужна менеджеру, а не калькулятору.
   function optionRow(o, checked) {
     return '<button type="button" class="calc-opt' + (checked ? ' is-on' : '') + '" data-opt="' + o.id + '">' +
       '<span class="calc-opt__box" aria-hidden="true"></span>' +
       '<span class="calc-opt__body"><span class="calc-opt__name">' + esc(o.name) + '</span>' +
       (o.hint ? '<span class="calc-opt__hint">' + esc(o.hint) + '</span>' : '') + '</span>' +
-      '<span class="calc-opt__price">+' + fmt(o.price) + ' ₽</span></button>';
+      '</button>';
+  }
+
+  // Счётчик стеклянных элементов: «−  2  +». Спрашиваем про сами двери и
+  // окна, а не про квадратные метры стекла, — правка Влада.
+  function glassRow(key, name, hint, value) {
+    var max = RULES.glassMaxCount || 4;
+    return '<div class="calc-opt calc-opt--count' + (value ? ' is-on' : '') + '">' +
+      '<span class="calc-opt__body"><span class="calc-opt__name">' + esc(name) + '</span>' +
+      '<span class="calc-opt__hint">' + esc(hint) + '</span></span>' +
+      '<span class="calc-count">' +
+        '<button type="button" class="calc-count__btn" data-glass-step="' + key + '" data-delta="-1"' +
+          (value <= 0 ? ' disabled' : '') + ' aria-label="Убрать">−</button>' +
+        '<b data-glass-val="' + key + '">' + value + '</b>' +
+        '<button type="button" class="calc-count__btn" data-glass-step="' + key + '" data-delta="1"' +
+          (value >= max ? ' disabled' : '') + ' aria-label="Добавить">+</button>' +
+      '</span></div>';
   }
 
   function render() {
@@ -233,32 +255,22 @@
           '<input type="range" min="' + R.area.min + '" max="' + R.area.max + '" step="' + R.area.step + '" value="' + state.area + '" data-area aria-label="Площадь парной в м²">' +
           '<div class="calc-range__scale"><span>' + R.area.min + ' м²</span><span>' + R.area.max + ' м²</span></div>' +
         '</div>' +
-        '<p class="calc__hint">Площадь пола при высоте потолка 2,4 м. Расчётный объём для печи — <b data-vol>' + volume() + ' м³</b>.</p>' +
+        '<p class="calc__hint">Площадь пола при высоте потолка 2,4 м. Расчётный объём — <b data-vol>' + volume() + ' м³</b>. ' +
+          'Знаете точную высоту и объём — скажите менеджеру, он пересчитает под ваши цифры.</p>' +
       '</div>' +
 
-      '<details class="calc__more"' + (state.glass || state.coldWall ? ' open' : '') + '>' +
-        '<summary>Уточнить объём <span>' + (state.glass || state.coldWall ? '(учтено)' : '') + '</span></summary>' +
-        '<div class="calc__field" style="margin-top:.8rem">' +
-          '<span class="calc__label">Площадь стекла' +
-            '<b class="calc__value" data-glass-val>' + num(state.glass, 1) + ' м²</b></span>' +
-          '<div class="calc-range">' +
-            '<input type="range" min="0" max="6" step="0.5" value="' + state.glass + '" data-glass aria-label="Площадь стекла в м²">' +
-            '<div class="calc-range__scale"><span>нет</span><span>6 м²</span></div>' +
-          '</div>' +
-          '<p class="calc__hint">Каждый квадратный метр стекла считаем как дополнительный кубометр парной.</p>' +
-        '</div>' +
+      '<div class="calc__field">' +
+        '<span class="calc__label"><i>3</i> Стекло в парной</span>' +
         '<div class="calc-opts">' +
-          '<button type="button" class="calc-opt' + (state.coldWall ? ' is-on' : '') + '" data-cold>' +
-            '<span class="calc-opt__box" aria-hidden="true"></span>' +
-            '<span class="calc-opt__body"><span class="calc-opt__name">Стена на улицу или без утепления</span>' +
-            '<span class="calc-opt__hint">Добавляем 50% к расчётному объёму. Кирпичная стена в расчёт не идёт</span></span>' +
-          '</button>' +
+          glassRow('in',  'Стеклянная дверь или окно внутри дома', 'Каждое добавляет 1 м³ к расчётному объёму', state.glassIn) +
+          glassRow('out', 'Стекло или стена, выходящие на улицу',  'Каждое добавляет 2 м³ к расчётному объёму', state.glassOut) +
         '</div>' +
-      '</details>' +
+        '<p class="calc__hint">Кирпичная стена в расчёт не идёт.</p>' +
+      '</div>' +
 
       (full ? (
         '<div class="calc__field">' +
-          '<span class="calc__label"><i>3</i> Тип парной</span>' +
+          '<span class="calc__label"><i>4</i> Тип парной</span>' +
           '<div class="calc-radio" data-steam>' +
             P.steamTypes.map(function (t) {
               return '<button type="button" class="calc-radio__opt' + (state.steamType === t.id ? ' is-on' : '') + '" data-steam-id="' + t.id + '">' +
@@ -268,7 +280,7 @@
         '</div>' +
 
         '<div class="calc__field">' +
-          '<span class="calc__label"><i>4</i> Уровень отделки</span>' +
+          '<span class="calc__label"><i>5</i> Уровень отделки</span>' +
           '<div class="calc-radio calc-radio--pkg" data-pkg>' +
             P.packages.map(function (p) {
               var locked = state.steamType === 'hammam' && p.id !== 'author';
@@ -290,11 +302,15 @@
       ) : '') +
 
 
-      (state.stove ? (
+      /* Печь к проекту не привязываем (правка Влада): карточку конкретной
+         модели показываем только в сценарии «только печь» и только если
+         человек сам ткнул её в каталоге. Топлива, класса печи и обвязки
+         с ценами в конфигураторе больше нет. */
+      (!full && state.stove ? (
         '<div class="calc-pick" data-pick>' +
           '<div class="calc-pick__img">' + (state.stove.img ? '<img src="' + esc(state.stove.img) + '" alt="' + esc(state.stove.name) + '" loading="lazy" decoding="async" width="560" height="560">' : '') + '</div>' +
           '<div class="calc-pick__body">' +
-            '<span class="calc-pick__label">Подходит вашей парной</span>' +
+            '<span class="calc-pick__label">Выбранная печь</span>' +
             '<b class="calc-pick__name">' + esc(state.stove.name) + '</b>' +
             '<span class="calc-pick__meta">' + esc(state.stove.brand) + ' · ' + state.stove.vmin + '–' + state.stove.vmax + ' м³</span>' +
           '</div>' +
@@ -302,38 +318,9 @@
         '</div>'
       ) : '') +
 
-      /* Топливо, класс печи и обвязка спрятаны под один раскрывающийся блок:
-         печь подбирается автоматически, и большинству эти поля не нужны.
-         Каждое лишнее видимое поле — это минус к доле дошедших до цены. */
-      '<details class="calc__more"' + (state.stoveTune || state.stoveOpts.size ? ' open' : '') + ' data-stove-tune>' +
-        '<summary>Настроить печь <span>' +
-          esc(state.fuel === 'wood' ? 'дрова' : 'электро') +
-          (state.stoveOpts.size ? ' · +' + state.stoveOpts.size : '') +
-        '</span></summary>' +
-
-        '<div class="calc__field calc__field--row" style="margin-top:.8rem">' +
-          '<div>' +
-            '<span class="calc__label">Топливо</span>' +
-            '<div class="calc-radio calc-radio--slim" data-fuel>' +
-              '<button type="button" class="calc-radio__opt' + (state.fuel === 'wood' ? ' is-on' : '') + '" data-fuel-id="wood"><b>Дрова</b></button>' +
-              '<button type="button" class="calc-radio__opt' + (state.fuel === 'electric' ? ' is-on' : '') + '" data-fuel-id="electric"><b>Электро</b></button>' +
-            '</div>' +
-          '</div>' +
-          '<div>' +
-            '<span class="calc__label">Класс печи</span>' +
-            '<div class="calc-radio calc-radio--slim" data-tier>' +
-              TIERS.map(function (t) {
-                return '<button type="button" class="calc-radio__opt' + (state.tier === t.id ? ' is-on' : '') + '" data-tier-id="' + t.id + '"><b>' + esc(t.label) + '</b></button>';
-              }).join('') +
-            '</div>' +
-          '</div>' +
-        '</div>' +
-
-        '<span class="calc__label">Обвязка и монтаж</span>' +
-        '<div class="calc-opts" data-stove-opts>' +
-          P.stoveOptions.map(function (o) { return optionRow(o, state.stoveOpts.has(o.id)); }).join('') +
-        '</div>' +
-      '</details>' +
+      (!full && !state.stove
+        ? '<p class="calc__hint calc__hint--pick">Модель подбирает инженер под ваш объём. Посмотреть печи и выбрать конкретную можно в <a href="#stoves" class="js-scroll">каталоге ниже</a>.</p>'
+        : '') +
 
       '<div class="calc__result' + (state.priceShown ? '' : ' calc__result--hidden') + '" data-result>' +
         (state.priceShown
@@ -351,7 +338,11 @@
         (state.priceShown ? '<p class="calc__result-note">' +
           (state.byProject
             ? 'Авторский проект и хамам считаются индивидуально: состав работ и материалы каждый раз свои, верхней границы нет. Инженер посчитает после замера.'
-            : 'Диапазон, а не финальная цена: на итог влияют объём парной, выбранная печь и инженерные решения. Точную смету инженер посчитает после замера.') +
+            : !full
+              ? (state.stove
+                  ? 'Цена печи без монтажа и дымохода: их считаем после замера — от него зависят длина дымохода, проход кровли и разделка.'
+                  : 'В диапазон попали все печи на ваш объём — и дровяные, и электрические, они отличаются по цене в разы. Модель подберёт инженер, или выберите конкретную в каталоге ниже.')
+              : 'Диапазон, а не финальная цена: на итог влияют объём парной, материалы и инженерные решения. Точную смету инженер считает после замера.') +
         '</p>' : '') +
       '</div>' +
 
@@ -368,7 +359,6 @@
 
     bind();
     syncSlider('[data-area]');
-    syncSlider('[data-glass]');
   }
 
   function syncSlider(sel) {
@@ -396,19 +386,7 @@
     if (v) v.textContent = volume() + ' м³';
   }
 
-  function updatePick() {
-    if (reveal()) return;
-    calc();
-    var pick = root.querySelector('[data-pick]');
-    if (pick && state.stove) {
-      pick.querySelector('.calc-pick__name').textContent = state.stove.name;
-      pick.querySelector('.calc-pick__meta').textContent = state.stove.brand + ' · ' + state.stove.vmin + '–' + state.stove.vmax + ' м³';
-      pick.querySelector('.calc-pick__price').textContent = fmt(state.stove.price) + ' ₽';
-      var img = pick.querySelector('img');
-      if (img && state.stove.img) { img.src = state.stove.img; img.alt = state.stove.name; }
-    }
-    updateResult();
-  }
+  function updatePick() { updateResult(); }
 
   function toggle(set, id) { if (set.has(id)) set.delete(id); else set.add(id); }
 
@@ -424,18 +402,14 @@
       syncSlider('[data-area]'); updatePick();
     });
 
-    var glass = root.querySelector('[data-glass]');
-    if (glass) glass.addEventListener('input', function () {
-      state.glass = parseFloat(glass.value);
-      root.querySelector('[data-glass-val]').textContent = num(state.glass, 1) + ' м²';
-      syncSlider('[data-glass]'); updatePick();
-    });
-
-    var cold = root.querySelector('[data-cold]');
-    if (cold) cold.addEventListener('click', function () {
-      state.coldWall = !state.coldWall;
-      cold.classList.toggle('is-on', state.coldWall);
-      updatePick();
+    root.querySelectorAll('[data-glass-step]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var key = b.dataset.glassStep === 'out' ? 'glassOut' : 'glassIn';
+        var max = RULES.glassMaxCount || 4;
+        state[key] = Math.min(max, Math.max(0, state[key] + (+b.dataset.delta)));
+        state.priceShown = true;
+        render();
+      });
     });
 
     root.querySelectorAll('[data-steam-id]').forEach(function (b) {
@@ -444,12 +418,6 @@
     root.querySelectorAll('[data-pkg-id]').forEach(function (b) {
       b.addEventListener('click', function () { if (!b.disabled) { state.pkg = b.dataset.pkgId; state.priceShown = true; render(); } });
     });
-    root.querySelectorAll('[data-fuel-id]').forEach(function (b) {
-      b.addEventListener('click', function () { state.fuel = b.dataset.fuelId; state.priceShown = true; render(); });
-    });
-    root.querySelectorAll('[data-tier-id]').forEach(function (b) {
-      b.addEventListener('click', function () { state.tier = b.dataset.tierId; state.priceShown = true; render(); });
-    });
 
     var fo = root.querySelector('[data-finish-opts]');
     if (fo) fo.addEventListener('click', function (e) {
@@ -457,17 +425,8 @@
       toggle(state.finishOpts, b.dataset.opt); b.classList.toggle('is-on'); updateResult();
     });
 
-    var so = root.querySelector('[data-stove-opts]');
-    if (so) so.addEventListener('click', function (e) {
-      var b = e.target.closest('[data-opt]'); if (!b) return;
-      toggle(state.stoveOpts, b.dataset.opt); b.classList.toggle('is-on'); updateResult();
-    });
-
     var rev = root.querySelector('[data-reveal]');
     if (rev) rev.addEventListener('click', function () { state.priceShown = true; render(); });
-
-    var tune = root.querySelector('[data-stove-tune]');
-    if (tune) tune.addEventListener('toggle', function () { state.stoveTune = tune.open; });
 
     root.querySelectorAll('[data-cta]').forEach(function (b) {
       b.addEventListener('click', function () { state.channel = b.dataset.cta; openModal(); });
@@ -479,8 +438,8 @@
     var lines = [];
     lines.push('Сценарий: ' + (MODES.filter(function (m) { return m.id === state.mode; })[0] || {}).label);
     lines.push('Парная: ' + num(state.area, 1) + ' м² (высота 2,4 м) — расчётный объём ' + volume() + ' м³');
-    if (state.glass) lines.push('Стекло: ' + num(state.glass, 1) + ' м²');
-    if (state.coldWall) lines.push('Холодная или неутеплённая стена: +50% к объёму');
+    if (state.glassIn) lines.push('Стекло внутри дома: ' + state.glassIn + ' шт. (+' + (state.glassIn * RULES.glassInside) + ' м³)');
+    if (state.glassOut) lines.push('Стекло или стена на улицу: ' + state.glassOut + ' шт. (+' + (state.glassOut * RULES.glassOutside) + ' м³)');
 
     if (state.mode === 'full') {
       var st = P.steamTypes.filter(function (t) { return t.id === state.steamType; })[0];
@@ -488,16 +447,12 @@
       lines.push('Тип парной: ' + (st ? st.label : ''));
       lines.push('Пакет: ' + pkg.name + bandLabel(pkg).replace(' · ', ' — '));
       if (state.finishOpts.size) {
-        lines.push('Допы: ' + P.finishOptions.filter(function (o) { return state.finishOpts.has(o.id); })
+        // Цен у допов нет: менеджеру уходит список интересов, не смета.
+        lines.push('Интересно дополнительно: ' + P.finishOptions.filter(function (o) { return state.finishOpts.has(o.id); })
           .map(function (o) { return o.name; }).join(', '));
       }
     }
-    lines.push('Топливо: ' + (state.fuel === 'wood' ? 'дрова' : 'электро'));
-    if (state.stove) lines.push('Подобрана печь: ' + state.stove.name + ' — ' + fmt(state.stove.price) + ' ₽');
-    if (state.stoveOpts.size) {
-      lines.push('Обвязка: ' + P.stoveOptions.filter(function (o) { return state.stoveOpts.has(o.id); })
-        .map(function (o) { return o.name; }).join(', '));
-    }
+    if (state.stove) lines.push('Выбрана печь в каталоге: ' + state.stove.name + ' — ' + fmt(state.stove.price) + ' ₽');
     lines.push(state.byProject
       ? 'Расчёт: от ' + fmt(state.total) + ' ₽, дальше по проекту'
       : 'Расчёт: ' + fmt(state.total) + ' – ' + fmt(state.totalMax) + ' ₽');
@@ -509,16 +464,13 @@
       mode: state.mode,
       area_m2: state.area,
       volume_m3: volume(),
-      glass_m2: state.glass,
-      cold_wall: state.coldWall,
+      glass_inside: state.glassIn,
+      glass_outside: state.glassOut,
       steam_type: state.steamType,
       package: state.pkg,
-      fuel: state.fuel,
-      tier: state.tier,
       stove: state.stove ? state.stove.name : '',
       stove_price: state.stove ? state.stove.price : 0,
       finish_options: Array.from(state.finishOpts),
-      stove_options: Array.from(state.stoveOpts),
       by_project: state.byProject,
       entry_product: QS.get('product') || '',
       estimate_min: state.total,
@@ -681,7 +633,6 @@
       state.priceShown = true;
       state.pinnedStove = stove;
       state.fuel = stove.fuel;
-      state.tier = stove.tier;
       var area = ((stove.vmin + stove.vmax) / 2) / RULES.ceilingHeight;
       state.area = Math.min(R.area.max, Math.max(R.area.min, Math.round(area * 2) / 2));
       render();
