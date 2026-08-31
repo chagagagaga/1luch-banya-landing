@@ -453,10 +453,13 @@ LUCH.reviews = [
 LUCH.brands = [
   // Правка Влада 31.08.2026: SPARTHERM и Cariitti убраны (каминные бренды,
   // к бане отношения не имеют), добавлен Технолит.
-  // ⚠️ ЖДЁМ ОТ ВЛАДА: логотипы Технолита и второго бренда из правки
-  // («сангенс» — уточняем написание). Пока выводим текстом.
+  // «Сангенс» из правки — это Sangens (sangens.com): российский
+  // производитель электрических печей для бани и сауны, на рынке с 2022.
+  // ⚠️ ЖДЁМ ОТ ВЛАДА логотипы Технолита и Sangens. Пока текстом — как
+  // EASYSTEAM, который тоже выводится словом.
   { name:'EASYSTEAM', logo:'' },
   { name:'Технолит',  logo:'' },
+  { name:'Sangens',   logo:'' },
   { name:'Harvia',    logo:'assets/img/brands/harvia.webp' },
   { name:'Tylo',      logo:'assets/img/brands/tylo.webp' },
   { name:'EOS',       logo:'assets/img/brands/eos.webp' },
