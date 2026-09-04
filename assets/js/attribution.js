@@ -145,6 +145,67 @@
     return out;
   }
 
+  /* ---- Уход в мессенджер -------------------------------------------------
+     Кнопка мессенджера уводит человека с сайта: заявки на сайте не создаётся,
+     и накопленная атрибуция до CRM не доезжает — обращение приходит без
+     источника. Поэтому на клике делаем две вещи.
+
+     1. В предзаполненный текст дописываем номер заявки. Менеджер видит его
+        первым сообщением и находит по нему источник. Работает только
+        в WhatsApp: Telegram и MAX предзаполнить личный чат не дают.
+     2. Отправляем маячок на приёмник — ClientID, yclid и метки. Он уходит
+        через sendBeacon, то есть переживает уход со страницы и ничего
+        не задерживает: переход в мессенджер не должен ждать сети.
+  ------------------------------------------------------------------------- */
+  // Маячок ухода в мессенджер уходит на тот же приёмник, что и заявки.
+  var MSG_ENDPOINT = window.LUCH_BEACON || 'https://cd-lead.chagagagaga.workers.dev/beacon';
+
+  function messengerOf(href) {
+    var h = String(href || '');
+    if (/(^|\/\/)(wa\.me|api\.whatsapp\.com|whatsapp\.com\/send)/i.test(h)) return 'whatsapp';
+    if (/(^|\/\/)(t\.me|telegram\.me)/i.test(h)) return 'telegram';
+    if (/(^|\/\/)max\.ru/i.test(h)) return 'max';
+    return '';
+  }
+
+  // Номер дописываем только там, где мессенджер умеет предзаполнить текст.
+  function withOrderNo(href) {
+    try {
+      var u = new URL(href, location.origin);
+      var t = (u.searchParams.get('text') || '').replace(/\s*№ заявки:[\s\S]*$/, '').trim();
+      u.searchParams.set('text', (t ? t + '\n\n' : '')
+        + '№ заявки: ' + LEAD_UID + '. Пожалуйста, не удаляйте номер.');
+      return u.toString();
+    } catch (e) { return href; }
+  }
+
+  function beacon(kind) {
+    if (!MSG_ENDPOINT || !navigator.sendBeacon) return;
+    try {
+      var p = window.LuchAttribution.getPayload();
+      p.event = 'messenger_click';
+      p.messenger = kind;
+      var body = new URLSearchParams();
+      Object.keys(p).forEach(function (k) {
+        var v = p[k];
+        if (v === undefined || v === null) return;
+        body.append(k, typeof v === 'object' ? JSON.stringify(v) : String(v));
+      });
+      navigator.sendBeacon(MSG_ENDPOINT, body);
+    } catch (e) {
+      // Упавший маячок не должен мешать человеку уйти в мессенджер.
+    }
+  }
+
+  document.addEventListener('click', function (e) {
+    var a = e.target && e.target.closest ? e.target.closest('a[href]') : null;
+    if (!a) return;
+    var kind = messengerOf(a.getAttribute('href'));
+    if (!kind) return;
+    if (kind === 'whatsapp') a.setAttribute('href', withOrderNo(a.getAttribute('href')));
+    beacon(kind);
+  }, true);
+
   window.LuchAttribution = {
     getPayload: function (extra) {
       var first = read(LS_FIRST) || snapshot;
