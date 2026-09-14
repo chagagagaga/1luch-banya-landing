@@ -19,7 +19,10 @@
   var ID = (window.LUCH && LUCH.company && LUCH.company.yandexMetrikaId) || 0;
 
   /* ---- Загрузка счётчика ------------------------------------------------- */
-  if (ID) {
+  // На локальном сервере счётчик не поднимаем: прогоны тестов иначе
+  // ложатся в статистику визитами, а цели — конверсиями.
+  var LOCAL = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+  if (ID && !LOCAL) {
     (function (m, e, t, r, i, k, a) {
       m[i] = m[i] || function () { (m[i].a = m[i].a || []).push(arguments); };
       m[i].l = 1 * new Date();
@@ -56,8 +59,16 @@
     var tel = t.closest('a[href^="tel:"]');
     if (tel) reach('phone_click', { place: tel.closest('.mobilebar') ? 'mobilebar' : 'page' });
 
-    var msg = t.closest('a[href*="wa.me"], a[href*="t.me"]');
-    if (msg) reach('messenger_click', { href: msg.getAttribute('href') });
+    // Общая цель и своя на каждый канал — под неё в счётчике заведены
+    // messenger_telegram / whatsapp / max. MAX ловим по кнопке: адрес
+    // у него свой, а пока и вовсе пустой.
+    var msg = t.closest('a[href*="wa.me"], a[href*="t.me"], a[href*="max.ru"], [data-max-link]');
+    if (msg) {
+      var h = msg.getAttribute('href') || '';
+      var kind = /wa\.me/.test(h) ? 'whatsapp' : /t\.me/.test(h) ? 'telegram' : 'max';
+      reach('messenger_click', { messenger: kind });
+      reach('messenger_' + kind);
+    }
 
     var cta = t.closest('[data-cta]');
     if (cta) reach('calc_cta_click', { channel: cta.dataset.cta });

@@ -85,6 +85,8 @@
     var id = (window.LUCH && LUCH.company && LUCH.company.yandexMetrikaId) || 0;
     if (id && typeof window.ym === 'function') {
       try { window.ym(id, 'reachGoal', 'lead_submitted', { source: payload.source }); } catch (e) {}
+      // Дубль под именем главной цели в счётчике Максима.
+      try { window.ym(id, 'reachGoal', 'lead_form', { source: payload.source }); } catch (e) {}
     }
   }
 
