@@ -153,6 +153,8 @@ main > section:nth-of-type(n+4) { content-visibility: auto; contain-intrinsic-si
    превращал логотип в белое пятно. Знак занимает кнопку целиком. */
 .msgdock__btn--max { background: none; box-shadow: none; }
 .msgdock__btn--max svg { width: 100%; height: 100%; border-radius: 22%; box-shadow: 0 8px 22px rgba(16, 14, 11, .32); }
+/* Первый Луч без MAX — на его месте в доке кружок «Позвонить» */
+.msgdock__btn--tel { background: var(--primary); }
 .msgdock__btn--tg { background: var(--tg); }
 .msgdock__btn--wa { background: var(--wa); }
 /* Подпись выезжает при наведении: кружок остаётся компактным, но
