@@ -239,7 +239,7 @@
       return '' +
       '<article class="work' + (idx >= VISIBLE ? ' is-hidden' : '') + '" data-work="' + esc(w.id) + '">' +
         '<button type="button" class="work__btn" data-open-work="' + idx + '" aria-label="Открыть галерею: ' + esc(w.place) + ', ' + esc(w.title) + '">' +
-          '<img src="' + esc(ph[0]) + '" alt="' + esc(w.place) + ': ' + esc(w.title) + '" loading="lazy" decoding="async" width="600" height="450">' +
+          '<img src="' + esc(ph[0].replace(/\.webp$/, '-s.webp')) + '" srcset="' + esc(ph[0].replace(/\.webp$/, '-s.webp')) + ' 600w, ' + esc(ph[0]) + ' 1000w" sizes="(max-width: 700px) 92vw, 33vw" alt="' + esc(w.place) + ': ' + esc(w.title) + '" loading="lazy" decoding="async" width="600" height="450">' +
           '<span class="work__count">' + ph.length + ' фото</span>' +
         '</button>' +
         '<div class="work__meta">' +

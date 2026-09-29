@@ -23,12 +23,19 @@
   // ложатся в статистику визитами, а цели — конверсиями.
   var LOCAL = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
   if (ID && !LOCAL) {
-    (function (m, e, t, r, i, k, a) {
-      m[i] = m[i] || function () { (m[i].a = m[i].a || []).push(arguments); };
-      m[i].l = 1 * new Date();
-      k = e.createElement(t); a = e.getElementsByTagName(t)[0];
-      k.async = 1; k.src = r; a.parentNode.insertBefore(k, a);
-    })(window, document, 'script', 'https://mc.yandex.ru/metrika/tag.js', 'ym');
+    // Очередь ym создаётся сразу (цели и init не теряются), а сам tag.js
+    // (~95 КБ и 1–2 с работы процессора на телефоне) грузим после загрузки
+    // страницы: первый экран больше не ждёт Метрику (29.09.2026, скорость).
+    window.ym = window.ym || function () { (window.ym.a = window.ym.a || []).push(arguments); };
+    window.ym.l = 1 * new Date();
+    var loadTag = function () {
+      if (loadTag.done) return; loadTag.done = 1;
+      var k = document.createElement('script'); k.async = 1; k.src = 'https://mc.yandex.ru/metrika/tag.js';
+      document.head.appendChild(k);
+    };
+    var later = function () { (window.requestIdleCallback || function (f) { setTimeout(f, 1200); })(loadTag, { timeout: 2500 }); };
+    if (document.readyState === 'complete') later(); else window.addEventListener('load', later);
+    ['pointerdown', 'keydown', 'scroll'].forEach(function (ev) { window.addEventListener(ev, loadTag, { once: true, passive: true }); });
 
     window.ym(ID, 'init', {
       clickmap: true,
