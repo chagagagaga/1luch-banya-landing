@@ -5,6 +5,8 @@ RewriteCond %{HTTPS} !on
 RewriteCond %{HTTP:X-HTTPS} !1
 RewriteCond %{SERVER_PORT} !^443$
 RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+RewriteRule ^ https://%1%{REQUEST_URI} [L,R=301]
 RewriteRule ^leads_backup/ - [F,L]
 <IfModule mod_deflate.c>
 AddOutputFilterByType DEFLATE text/html text/css application/javascript application/json image/svg+xml
