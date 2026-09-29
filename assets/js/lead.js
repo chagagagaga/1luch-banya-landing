@@ -16,6 +16,7 @@
   // из России не должно быть зарубежных адресов в пути. На github.io — прежний воркер.
   var OWN = /(^|\.)1luch\.ru$/.test(location.hostname);
   var ENDPOINT = window.LUCH_ENDPOINT || (OWN ? '/lead.php' : 'https://cd-lead.chagagagaga.workers.dev/lead');
+  var NO_CORS = !OWN && !window.LUCH_ENDPOINT && location.hostname !== 'chagagagaga.github.io';
   var THANKS_URL = 'spasibo.html';
 
   // Демо-режим: показываем весь сценарий, но ничего не отправляем.
@@ -126,11 +127,18 @@
 
     var request = isLocal
       ? new Promise(function (r) { setTimeout(function () { r({ ok: true }); }, 500); })
-      : fetch(ENDPOINT, {
+      : fetch(ENDPOINT, NO_CORS ? {
+          // Домена нет в списке воркера: шлём «простым» запросом без preflight.
+          // Заявка доходит (воркер читает JSON из тела), ответ браузеру не виден —
+          // считаем успехом, если сеть не упала.
+          method: 'POST', mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+          body: JSON.stringify(payload),
+        } : {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
-        });
+        }).then(function (r) { return NO_CORS ? { ok: true } : r; });
 
     request
       .then(function (res) {
