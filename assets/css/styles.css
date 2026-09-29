@@ -126,7 +126,10 @@ input, textarea, select, button { font-family: inherit; font-size: inherit; }
 /* Скорость: секции ниже первого экрана браузер не рисует, пока до них не
    дошли. contain-intrinsic-size держит высоту скроллбара, чтобы полоса
    не прыгала. Первый экран и следующий за ним блок из этого исключены. */
-main > section:nth-of-type(n+4) { content-visibility: auto; contain-intrinsic-size: auto 800px; }
+/* 29.09.2026: content-visibility снят. На Android (баг Ивана) при перерисовке
+   конфигуратора браузер пересчитывал высоты невидимых секций, страница
+   прыгала к «Нашим работам», а нажатия уходили мимо кнопок. */
+.calc, [data-calc] { overflow-anchor: none; }
 
 .mobilebar__btn--max { background: var(--max); color: #fff; }
 .mobilebar__btn--tg { background: var(--tg); color: #fff; }
@@ -1350,3 +1353,6 @@ textarea.input { resize: vertical; min-height: 88px; }
   .header, .mobilebar { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
   .header { background: rgba(16, 14, 11, .97); }
 }
+
+/* Кнопки конфигуратора: без задержки двойного тапа и без выделения текста */
+[data-calc] button { touch-action: manipulation; -webkit-user-select: none; user-select: none; }

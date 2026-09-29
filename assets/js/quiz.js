@@ -424,13 +424,17 @@
       toggle(state.finishOpts, b.dataset.opt); b.classList.toggle('is-on'); updateResult();
     });
 
-    var rev = root.querySelector('[data-reveal]');
-    if (rev) rev.addEventListener('click', function () { state.priceShown = true; render(); });
-
-    root.querySelectorAll('[data-cta]').forEach(function (b) {
-      b.addEventListener('click', function () { state.channel = b.dataset.cta; openModal(); });
-    });
+    // «Показать стоимость» и «В мессенджер / По телефону» ловим одним
+    // обработчиком на корне (см. delegate ниже): он переживает любую
+    // перерисовку конфигуратора и срабатывает, даже если bind() где-то упал.
   }
+
+  root.addEventListener('click', function (e) {
+    var t = e.target.closest && e.target.closest('[data-reveal],[data-cta]');
+    if (!t || !root.contains(t)) return;
+    if (t.hasAttribute('data-reveal')) { state.priceShown = true; render(); return; }
+    state.channel = t.dataset.cta; openModal();
+  });
 
   /* ---- Сводка конфигурации для менеджера --------------------------------- */
   function summary() {
