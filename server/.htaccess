@@ -8,6 +8,11 @@ RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
 RewriteRule ^ https://%1%{REQUEST_URI} [L,R=301]
 RewriteRule ^leads_backup/ - [F,L]
+# Главный адрес по решению Ивана (29.09.2026) — banya.1-luch.ru.
+# 1luch.ru ведёт туда же, чтобы ссылка была одна; приёмники заявок не трогаем.
+RewriteCond %{HTTP_HOST} ^1luch\.ru$ [NC]
+RewriteCond %{REQUEST_URI} !^/(lead|beacon)\.php$
+RewriteRule ^ https://banya.1-luch.ru%{REQUEST_URI} [L,R=301]
 <IfModule mod_deflate.c>
 AddOutputFilterByType DEFLATE text/html text/css application/javascript application/json image/svg+xml
 </IfModule>
