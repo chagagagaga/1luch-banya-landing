@@ -14,7 +14,7 @@
   ----------------------------------------------------------------------- */
   // На своём домене (1luch.ru, российский хостинг) заявка идёт на свой же сервер:
   // из России не должно быть зарубежных адресов в пути. На github.io — прежний воркер.
-  var OWN = /(^|\.)(1luch\.ru|banya\.1-luch\.ru)$/.test(location.hostname);
+  var OWN = /(^|\.)1luch\.ru$/.test(location.hostname);
   var ENDPOINT = window.LUCH_ENDPOINT || (OWN ? '/lead.php' : 'https://cd-lead.chagagagaga.workers.dev/lead');
   var THANKS_URL = 'spasibo.html';
 
