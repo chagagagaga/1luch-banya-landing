@@ -29,6 +29,6 @@ if (!$ok) {
     $via = 'lso_direct:' . $c2;
     $ok = $c2 >= 200 && $c2 < 300;
 }
-@file_put_contents(__DIR__ . '/../leads_backup/' . date('Y-m') . '.jsonl',
+@file_put_contents(__DIR__ . '/leads_backup/' . date('Y-m') . '.jsonl',
     json_encode(['t' => date('c'), 'via' => $via, 'worker_http' => $code, 'lead' => $lead], JSON_UNESCAPED_UNICODE) . "\n", FILE_APPEND | LOCK_EX);
 echo json_encode(['ok' => true, 'via' => $via]);
