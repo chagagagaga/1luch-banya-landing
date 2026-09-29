@@ -14,7 +14,7 @@ if (!empty($lead['website'])) { echo '{"ok":true}'; exit; }          // лову
 function post($url, $body, $type, $timeout = 8) {
     $ch = curl_init($url);
     curl_setopt_array($ch, [CURLOPT_POST => true, CURLOPT_POSTFIELDS => $body,
-        CURLOPT_HTTPHEADER => ['Content-Type: ' . $type, 'Origin: https://1luch.ru'],
+        CURLOPT_HTTPHEADER => ['Content-Type: ' . $type, 'Origin: https://' . $_SERVER['HTTP_HOST']],
         CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => $timeout, CURLOPT_CONNECTTIMEOUT => 5]);
     $res = curl_exec($ch); $code = curl_getinfo($ch, CURLINFO_HTTP_CODE); curl_close($ch);
     return [$code, $res];
@@ -24,7 +24,7 @@ list($code, $res) = post('https://cd-lead.chagagagaga.workers.dev/lead', $raw, '
 $ok = $code >= 200 && $code < 300;
 $via = 'worker';
 if (!$ok) {
-    $lso = $lead; $lso['site_key'] = '1luch_ru'; $lso['landing'] = $lead['site_key'] ?? 'luch-banya';
+    $lso = $lead; $lso['site_key'] = strtolower(preg_replace('/[^a-z0-9]+/i', '_', preg_replace('/^www\./', '', $_SERVER['HTTP_HOST']))); $lso['landing'] = $lead['site_key'] ?? 'luch-banya';
     list($c2, $r2) = post('https://ceramicadecor.ru/feedback/external_lead', json_encode($lso, JSON_UNESCAPED_UNICODE), 'application/json');
     $via = 'lso_direct:' . $c2;
     $ok = $c2 >= 200 && $c2 < 300;
