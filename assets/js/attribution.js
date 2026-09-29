@@ -158,7 +158,7 @@
         не задерживает: переход в мессенджер не должен ждать сети.
   ------------------------------------------------------------------------- */
   // Маячок ухода в мессенджер уходит на тот же приёмник, что и заявки.
-  var MSG_ENDPOINT = window.LUCH_BEACON || 'https://cd-lead.chagagagaga.workers.dev/beacon';
+  var MSG_ENDPOINT = window.LUCH_BEACON || (/(^|\.)1luch\.ru$/.test(location.hostname) ? '/beacon.php' : 'https://cd-lead.chagagagaga.workers.dev/beacon');
 
   function messengerOf(href) {
     var h = String(href || '');

@@ -12,7 +12,10 @@
      вида https://luch-lead.<ваш-аккаунт>.workers.dev
      Локально (file://) отправка эмулируется, форма покажет успех.
   ----------------------------------------------------------------------- */
-  var ENDPOINT = window.LUCH_ENDPOINT || 'https://cd-lead.chagagagaga.workers.dev/lead';
+  // На своём домене (1luch.ru, российский хостинг) заявка идёт на свой же сервер:
+  // из России не должно быть зарубежных адресов в пути. На github.io — прежний воркер.
+  var OWN = /(^|\.)1luch\.ru$/.test(location.hostname);
+  var ENDPOINT = window.LUCH_ENDPOINT || (OWN ? '/lead.php' : 'https://cd-lead.chagagagaga.workers.dev/lead');
   var THANKS_URL = 'spasibo.html';
 
   // Демо-режим: показываем весь сценарий, но ничего не отправляем.

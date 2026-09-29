@@ -1,0 +1,19 @@
+# 1luch.ru — https, без www, сжатие и кэш статики
+RewriteEngine On
+RewriteCond %{HTTPS} off [OR]
+RewriteCond %{HTTP_HOST} ^www\. [NC]
+RewriteRule ^ https://1luch.ru%{REQUEST_URI} [L,R=301]
+RewriteRule ^leads_backup/ - [F,L]
+<IfModule mod_deflate.c>
+AddOutputFilterByType DEFLATE text/html text/css application/javascript application/json image/svg+xml
+</IfModule>
+<IfModule mod_expires.c>
+ExpiresActive On
+ExpiresByType image/webp "access plus 30 days"
+ExpiresByType image/jpeg "access plus 30 days"
+ExpiresByType image/png "access plus 30 days"
+ExpiresByType font/woff2 "access plus 1 year"
+ExpiresByType text/css "access plus 7 days"
+ExpiresByType application/javascript "access plus 7 days"
+ExpiresByType text/html "access plus 0 seconds"
+</IfModule>
