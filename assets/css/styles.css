@@ -1342,3 +1342,11 @@ textarea.input { resize: vertical; min-height: 88px; }
   .calc-mode__best { position: absolute; top: -8px; right: 2px; margin-left: 0; }
   .calc__field { margin-bottom: .7rem; }
 }
+
+/* Скорость на телефонах (29.09.2026): размытие фона под шапкой и нижней
+   панелью пересчитывается на каждом кадре прокрутки — на слабых телефонах
+   это сотни мс. На мобильных заменяем его плотной заливкой. */
+@media (max-width: 900px) {
+  .header, .mobilebar { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+  .header { background: rgba(16, 14, 11, .97); }
+}
