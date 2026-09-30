@@ -1356,3 +1356,12 @@ textarea.input { resize: vertical; min-height: 88px; }
 
 /* Кнопки конфигуратора: без задержки двойного тапа и без выделения текста */
 [data-calc] button { touch-action: manipulation; -webkit-user-select: none; user-select: none; }
+
+/* 30.09.2026 (Иван, S25 Ultra): на телефоне калькулятор был отдельным окном
+   со своей прокруткой (max-height 82vh + overscroll-behavior: contain).
+   Свайп внутри него листал только калькулятор, а упёршись в край — ничего:
+   страница «не листалась». На телефонах и планшетах калькулятор — обычная
+   часть страницы, прокрутка одна. */
+@media (max-width: 980px) {
+  .calc { max-height: none; overflow: visible; overscroll-behavior: auto; }
+}
